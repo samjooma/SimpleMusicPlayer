@@ -49,6 +49,7 @@ namespace MyMusicPlayer
         private FileHierarchyViewModel? FileHierarchyViewModel;
         public DirectoryViewModel? RootDirectoryViewModel { get => FileHierarchyViewModel?.RootViewModel; }
         public string? RootPath { get => RootDirectoryViewModel?.FullName; }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public Properties()

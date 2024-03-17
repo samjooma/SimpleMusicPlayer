@@ -25,9 +25,10 @@ namespace MyMusicPlayer.ViewModel
         public FileHierarchyViewModel(string RootDirectoryPath)
         {
             DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>();
-            Files = new FileHierarchy(RootDirectoryPath);
+            Files = new FileHierarchy();
             Files.AfterDirectoryOpened += Files_AfterDirectoryOpened;
             Files.AfterDirectoryClosed += Files_AfterDirectoryClosed;
+            Files.OpenDirectory(RootDirectoryPath);
         }
 
         private bool TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)
