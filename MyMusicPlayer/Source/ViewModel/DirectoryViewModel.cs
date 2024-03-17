@@ -18,9 +18,7 @@ namespace MyMusicPlayer.ViewModel
     {
         private FileHierarchy Files { get; set; }
         private Dictionary<DirectoryInfo, DirectoryViewModel> DirectoryViewModels { get; set; }
-        public DirectoryViewModel RootViewModel {
-            get => DirectoryViewModels[Files.RootDirectory];
-        }
+        public DirectoryViewModel RootViewModel { get => DirectoryViewModels[Files.RootDirectory]; }
 
         public FileHierarchyViewModel(string RootDirectoryPath)
         {
