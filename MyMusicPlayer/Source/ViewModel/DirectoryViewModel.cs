@@ -24,9 +24,11 @@ namespace MyMusicPlayer.ViewModel
 
         public FileHierarchyViewModel(string RootDirectoryPath)
         {
-            Files = new FileHierarchy(RootDirectoryPath);
             DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>();
-            OpenDirectory(Files.RootDirectory);
+            Files = new FileHierarchy(RootDirectoryPath);
+            Files.AfterDirectoryOpened += Files_AfterDirectoryOpened;
+            Files.AfterDirectoryClosed += Files_AfterDirectoryClosed;
+            Files.OpenDirectory(Files.RootDirectory);
         }
 
         private bool TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)
@@ -39,28 +41,28 @@ namespace MyMusicPlayer.ViewModel
             return false;
         }
 
-        private void OpenDirectory(DirectoryInfo Directory)
+        private void Files_AfterDirectoryOpened(object? sender, DirectoryOpenedEventArgs e)
         {
-            // Add subdirectories.
-            DirectoryInfo[] SubDirectories = Files.OpenDirectory(Directory);
-            foreach (DirectoryInfo SubDirectory in SubDirectories)
+            // Create viewmodels for the opened directory and its subdirectories.
+
+            // Viewmodels for subdirectories.
+            foreach (DirectoryInfo SubDirectory in e.SubDirectories)
             {
                 TryAddDirectoryViewModel(SubDirectory, new DirectoryViewModel(SubDirectory, null));
             }
-            var Children = new ObservableCollection<DirectoryViewModel>(SubDirectories.Select(x => DirectoryViewModels[x]));
+            var Children = new ObservableCollection<DirectoryViewModel>(e.SubDirectories.Select(x => DirectoryViewModels[x]));
 
-            // Add directory.
-            if (!TryAddDirectoryViewModel(Directory, new DirectoryViewModel(Directory, Children)))
+            // Viewmodel for directory.
+            if (!TryAddDirectoryViewModel(e.Directory, new DirectoryViewModel(e.Directory, Children)))
             {
                 // Viewmodel already exists, just update its children.
-                DirectoryViewModels[Directory].Children = Children;
+                DirectoryViewModels[e.Directory].Children = Children;
             }
         }
 
-        private void CloseDirectory(DirectoryInfo Directory)
+        private void Files_AfterDirectoryClosed(object? sender, DirectoryClosedEventArgs e)
         {
-            Files.CloseDirectory(Directory);
-            DirectoryViewModels.Remove(Directory);
+            DirectoryViewModels.Remove(e.Directory);
         }
 
         private void DirectoryViewModel_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
@@ -75,14 +77,14 @@ namespace MyMusicPlayer.ViewModel
                 {
                     foreach (DirectoryViewModel Child in DirectoryViewModel.Children)
                     {
-                        OpenDirectory(Child.Directory);
+                        Files.OpenDirectory(Child.Directory);
                     }
                 }
                 else
                 {
                     foreach (DirectoryViewModel Child in DirectoryViewModel.Children)
                     {
-                        CloseDirectory(Child.Directory);
+                        Files.CloseDirectory(Child.Directory);
                     }
                 }
             }
