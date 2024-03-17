@@ -18,27 +18,22 @@ namespace MyMusicPlayer.Model
             RootDirectory = new DirectoryInfo(FilePath);
             DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>();
             //FileMap = new Dictionary<DirectoryInfo, List<FileInfo>?>();
-            UpdateSubDirectories(RootDirectory);
         }
 
-        public void ClearSubDirectories(DirectoryInfo Directory)
+        private void UpdateSubDirectories(DirectoryInfo Directory)
+        {
+            DirectoryMap[Directory] = Directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
+        }
+
+        public DirectoryInfo[] OpenSubDirectories(DirectoryInfo Directory)
+        {
+            UpdateSubDirectories(Directory);
+            return DirectoryMap[Directory];
+        }
+
+        public void CloseSubDirectories(DirectoryInfo Directory)
         {
             DirectoryMap.Remove(Directory);
-        }
-
-        public void UpdateSubDirectories(DirectoryInfo Directory)
-        {
-            if (!DirectoryMap.ContainsKey(Directory))
-            {
-                DirectoryMap[Directory] = Directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
-            }
-        }
-
-        public DirectoryInfo[]? GetSubDirectories(DirectoryInfo Directory)
-        {
-            DirectoryInfo[]? Result;
-            DirectoryMap.TryGetValue(Directory, out Result);
-            return Result;
         }
     }
 }

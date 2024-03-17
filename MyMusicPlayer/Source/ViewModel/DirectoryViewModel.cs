@@ -22,7 +22,7 @@ namespace MyMusicPlayer.ViewModel
         public FileHierarchyViewModel(string RootDirectoryPath)
         {
             Files = new FileHierarchy(RootDirectoryPath);
-            Files.UpdateSubDirectories(Files.RootDirectory);
+            Files.OpenSubDirectories(Files.RootDirectory);
             RootViewModel = new DirectoryViewModel(Files, Files.RootDirectory, null);
         } 
     }
@@ -65,11 +65,11 @@ namespace MyMusicPlayer.ViewModel
                     {
                         if (_isExpanded)
                         {
-                            Files.UpdateSubDirectories(Child.Directory);
+                            Files.OpenSubDirectories(Child.Directory);
                         }
                         else
                         {
-                            Files.ClearSubDirectories(Child.Directory);
+                            Files.CloseSubDirectories(Child.Directory);
                         }
                         Child.UpdateChildren();
                     }
@@ -79,7 +79,7 @@ namespace MyMusicPlayer.ViewModel
 
         private void UpdateChildren()
         {
-            DirectoryInfo[]? SubDirectories = Files.GetSubDirectories(Directory);
+            DirectoryInfo[]? SubDirectories = Files.OpenSubDirectories(Directory);
             if (SubDirectories == null)
             {
                 Children = null;
