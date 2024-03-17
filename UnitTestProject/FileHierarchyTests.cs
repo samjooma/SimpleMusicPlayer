@@ -20,8 +20,8 @@ namespace UnitTestProject
         public void OpenRootSubDirectories_LengthIsOne()
         {
             var Files = new FileHierarchy(RootDirectoryName);
-            var asdf = Files.OpenDirectory(Files.RootDirectory);
-            Assert.AreEqual(1, asdf.Length);
+            var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
+            Assert.AreEqual(1, SubDirectories.Length);
         }
 
         [TestMethod]
