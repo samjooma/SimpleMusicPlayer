@@ -20,7 +20,7 @@ namespace UnitTestProject
         public void GetRootSubDirectories_LengthIsOne()
         {
             var Files = new FileHierarchy(RootDirectoryName);
-            var asdf = Files.OpenSubDirectories(Files.RootDirectory);
+            var asdf = Files.OpenDirectory(Files.RootDirectory);
             Assert.AreEqual(1, asdf.Length);
         }
 
@@ -28,7 +28,7 @@ namespace UnitTestProject
         public void GetRootSubDirectories_NameIsValid()
         {
             var Files = new FileHierarchy(RootDirectoryName);
-            var SubDirectories = Files.OpenSubDirectories(Files.RootDirectory);
+            var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
             Assert.AreEqual("Kevin MacLeod", SubDirectories[0].Name, false);
         }
     }

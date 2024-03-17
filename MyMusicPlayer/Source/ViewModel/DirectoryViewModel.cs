@@ -16,36 +16,94 @@ namespace MyMusicPlayer.ViewModel
 {
     public class FileHierarchyViewModel
     {
-        private FileHierarchy Files;
-        public DirectoryViewModel RootViewModel { get; private set; }
+        private FileHierarchy Files { get; set; }
+        private Dictionary<DirectoryInfo, DirectoryViewModel> DirectoryViewModels { get; set; }
+        public DirectoryViewModel RootViewModel {
+            get => DirectoryViewModels[Files.RootDirectory];
+        }
 
         public FileHierarchyViewModel(string RootDirectoryPath)
         {
             Files = new FileHierarchy(RootDirectoryPath);
-            Files.OpenSubDirectories(Files.RootDirectory);
-            RootViewModel = new DirectoryViewModel(Files, Files.RootDirectory, null);
-        } 
+            DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>();
+            OpenDirectory(Files.RootDirectory);
+        }
+
+        private bool TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)
+        {
+            if (DirectoryViewModels.TryAdd(Key, Value))
+            {
+                Value.PropertyChanged += DirectoryViewModel_PropertyChanged;
+                return true;
+            }
+            return false;
+        }
+
+        private void OpenDirectory(DirectoryInfo Directory)
+        {
+            // Add subdirectories.
+            DirectoryInfo[] SubDirectories = Files.OpenDirectory(Directory);
+            foreach (DirectoryInfo SubDirectory in SubDirectories)
+            {
+                TryAddDirectoryViewModel(SubDirectory, new DirectoryViewModel(SubDirectory, null));
+            }
+            var Children = new ObservableCollection<DirectoryViewModel>(SubDirectories.Select(x => DirectoryViewModels[x]));
+
+            // Add directory.
+            if (!TryAddDirectoryViewModel(Directory, new DirectoryViewModel(Directory, Children)))
+            {
+                // Viewmodel already exists, just update its children.
+                DirectoryViewModels[Directory].Children = Children;
+            }
+        }
+
+        private void CloseDirectory(DirectoryInfo Directory)
+        {
+            Files.CloseDirectory(Directory);
+            DirectoryViewModels.Remove(Directory);
+        }
+
+        private void DirectoryViewModel_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
+        {
+            if (Sender is DirectoryViewModel DirectoryViewModel && e.PropertyName == nameof(DirectoryViewModel.IsExpanded))
+            {
+                if (DirectoryViewModel.Children == null)
+                {
+                    throw new ArgumentNullException("DirectoryViewModel.Children == null"); //TODO: Better exception.
+                }
+                if (DirectoryViewModel.IsExpanded)
+                {
+                    foreach (DirectoryViewModel Child in DirectoryViewModel.Children)
+                    {
+                        OpenDirectory(Child.Directory);
+                    }
+                }
+                else
+                {
+                    foreach (DirectoryViewModel Child in DirectoryViewModel.Children)
+                    {
+                        CloseDirectory(Child.Directory);
+                    }
+                }
+            }
+        }
     }
 
     public class DirectoryViewModel : INotifyPropertyChanged
     {
-        private readonly FileHierarchy Files;
-        private readonly DirectoryInfo Directory;
-
-        public DirectoryViewModel? Parent { get; private set; }
-        public ObservableCollection<DirectoryViewModel>? Children { get; private set; }
+        public DirectoryInfo Directory { get; private set; }
+        public ObservableCollection<DirectoryViewModel>? Children { get; set; }
 
         public string Name { get => Directory.Name; }
         public string FullName { get => Directory.FullName; }
         private bool _isExpanded;
 
-        public DirectoryViewModel(FileHierarchy Files, DirectoryInfo Directory, DirectoryViewModel? Parent)
-        {
-            this.Files = Files;
-            this.Directory = Directory;
-            this.Parent = Parent;
-            UpdateChildren(); // Root directory's children should be filled immediately.
+        public event PropertyChangedEventHandler? PropertyChanged;
 
+        public DirectoryViewModel(DirectoryInfo Directory, ObservableCollection<DirectoryViewModel>? Children)
+        {
+            this.Directory = Directory;
+            this.Children = Children;
             _isExpanded = false;
         }
 
@@ -54,47 +112,14 @@ namespace MyMusicPlayer.ViewModel
             get => _isExpanded;
             set
             {
-                if (value == _isExpanded) return;
-
-                _isExpanded = value;
-                NotifyPropertyChanged(nameof(IsExpanded));
-
-                if (Children != null)
+                if (value != _isExpanded)
                 {
-                    foreach (DirectoryViewModel Child in Children)
-                    {
-                        if (_isExpanded)
-                        {
-                            Files.OpenSubDirectories(Child.Directory);
-                        }
-                        else
-                        {
-                            Files.CloseSubDirectories(Child.Directory);
-                        }
-                        Child.UpdateChildren();
-                    }
+                    _isExpanded = value;
+                    NotifyPropertyChanged(nameof(IsExpanded));
                 }
             }
         }
-
-        private void UpdateChildren()
-        {
-            DirectoryInfo[]? SubDirectories = Files.OpenSubDirectories(Directory);
-            if (SubDirectories == null)
-            {
-                Children = null;
-            }
-            else
-            {
-                Children = new ObservableCollection<DirectoryViewModel>();
-                foreach (DirectoryInfo SubDirectory in SubDirectories)
-                {
-                    Children.Add(new DirectoryViewModel(Files, SubDirectory, this));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
+        
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
