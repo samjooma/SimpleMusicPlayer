@@ -28,7 +28,6 @@ namespace MyMusicPlayer.ViewModel
             Files = new FileHierarchy(RootDirectoryPath);
             Files.AfterDirectoryOpened += Files_AfterDirectoryOpened;
             Files.AfterDirectoryClosed += Files_AfterDirectoryClosed;
-            Files.OpenDirectory(Files.RootDirectory);
         }
 
         private bool TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)

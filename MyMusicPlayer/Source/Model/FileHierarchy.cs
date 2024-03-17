@@ -30,17 +30,16 @@ namespace MyMusicPlayer.Model
     {
         public DirectoryInfo RootDirectory { get; private set; }
         private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryMap;
-        //private Dictionary<DirectoryInfo, List<FileInfo>?> FileMap;
 
-        public event EventHandler<DirectoryContentsChangedEventArgs> DirectoryContentChanged;
-        public event EventHandler<DirectoryOpenedEventArgs> AfterDirectoryOpened;
-        public event EventHandler<DirectoryClosedEventArgs> AfterDirectoryClosed;
+        public event EventHandler<DirectoryContentsChangedEventArgs>? DirectoryContentChanged;
+        public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
+        public event EventHandler<DirectoryClosedEventArgs>? AfterDirectoryClosed;
 
         public FileHierarchy(string FilePath)
         {
             RootDirectory = new DirectoryInfo(FilePath);
             DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>();
-            //FileMap = new Dictionary<DirectoryInfo, List<FileInfo>?>();
+            OpenDirectory(RootDirectory);
         }
 
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)

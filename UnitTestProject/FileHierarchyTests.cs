@@ -17,7 +17,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void GetRootSubDirectories_LengthIsOne()
+        public void OpenRootSubDirectories_LengthIsOne()
         {
             var Files = new FileHierarchy(RootDirectoryName);
             var asdf = Files.OpenDirectory(Files.RootDirectory);
@@ -25,7 +25,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void GetRootSubDirectories_NameIsValid()
+        public void OpenRootSubDirectories_NameIsValid()
         {
             var Files = new FileHierarchy(RootDirectoryName);
             var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
