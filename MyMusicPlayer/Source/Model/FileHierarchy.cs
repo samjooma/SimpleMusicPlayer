@@ -1,6 +1,7 @@
 ﻿using MS.WindowsAPICodePack.Internal;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,21 @@ namespace MyMusicPlayer.Model
 
     public class FileHierarchy
     {
+        public class DirectoryComparer : IEqualityComparer<DirectoryInfo>
+        {
+            public bool Equals(DirectoryInfo? a, DirectoryInfo? b)
+            {
+                if (a == null && b == null) return true;
+                if (a == null || b == null) return false;
+                return a.FullName == b.FullName;
+            }
+
+            public int GetHashCode([DisallowNull] DirectoryInfo obj)
+            {
+                return obj.FullName.GetHashCode();
+            }
+        }
+
         private DirectoryInfo? _rootDirectory;
         public DirectoryInfo RootDirectory {
             get
@@ -40,7 +56,7 @@ namespace MyMusicPlayer.Model
 
         public FileHierarchy()
         {
-            DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>();
+            DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
         }
 
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
@@ -60,9 +76,9 @@ namespace MyMusicPlayer.Model
             }   
         }
 
-        public DirectoryInfo[] OpenDirectory(string DirectoryPath)
+        public DirectoryInfo[] GetAllOpenDirectories()
         {
-            return OpenDirectory(new DirectoryInfo(DirectoryPath));
+            return DirectoryMap.Keys.ToArray();
         }
 
         public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
@@ -77,18 +93,36 @@ namespace MyMusicPlayer.Model
             return DirectoryMap[Directory];
         }
 
+        public DirectoryInfo[] OpenDirectory(string DirectoryPath)
+        {
+            return OpenDirectory(new DirectoryInfo(DirectoryPath));
+        }
+
         public void CloseDirectory(DirectoryInfo Directory)
         {
-            // Close children.
-            foreach (var SubDirectory in DirectoryMap[Directory])
+            if (Directory == RootDirectory)
             {
-                if (DirectoryMap.ContainsKey(SubDirectory))
+                throw new ArgumentException(); //TODO: Better exception.
+            }
+
+            // Close children recursively.
+            foreach (var Subdirectory in DirectoryMap[Directory])
+            {
+                if (DirectoryMap.ContainsKey(Subdirectory))
                 {
-                    CloseDirectory(SubDirectory);
+                    CloseDirectory(Subdirectory);
                 }
             }
             DirectoryMap.Remove(Directory);
             AfterDirectoryClosed?.Invoke(this, new DirectoryClosedEventArgs(Directory));
+        }
+
+        public void CloseSubDirectories(DirectoryInfo Directory)
+        {
+            foreach (var SubDirectory in GetSubDirectories(Directory))
+            {
+                CloseDirectory(SubDirectory);
+            }
         }
     }
 }

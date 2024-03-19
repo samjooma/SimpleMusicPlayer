@@ -15,20 +15,21 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TreeView ItemsSource="{Binding RootDirectoryViewModel, Converter={StaticResource ObjectArrayConverter}}">
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                    <Setter Property="FontWeight" Value="Normal" />
-                </Style>
-            </TreeView.ItemContainerStyle>
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}" />
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Grid.Column="1" Click="OpenFolderButton_Click"/>
-        <Label Grid.Column="1" HorizontalAlignment="Left" Margin="37,55,0,0" VerticalAlignment="Top" Content="{Binding FileName}"/>
+        <StackPanel>
+            <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
+            <TreeView ItemsSource="{Binding RootDirectoryViewModel, Converter={StaticResource ObjectArrayConverter}}">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="FontWeight" Value="Normal" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <TextBlock Text="{Binding Name}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </StackPanel>
     </Grid>
 </Window>
