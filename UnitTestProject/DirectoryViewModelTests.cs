@@ -17,21 +17,24 @@ namespace UnitTestProject
         [TestMethod]
         public void CreateViewModel_RootNameIsValid()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             Assert.AreEqual(RootDirectoryName, FilesViewModel.RootViewModel.Name, false);
         }
 
         [TestMethod]
         public void CreateViewModel_ChildrenAreNotNull()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             Assert.IsNotNull(FilesViewModel.RootViewModel.Children);
         }
 
         [TestMethod]
         public void ShrinkAndExpandRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             FilesViewModel.RootViewModel.IsExpanded = false;
             FilesViewModel.RootViewModel.IsExpanded = true;
             Assert.AreEqual(2, FilesViewModel.RootViewModel.Children.Count());
@@ -40,7 +43,8 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAndShrinkRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             FilesViewModel.RootViewModel.IsExpanded = true;
             FilesViewModel.RootViewModel.IsExpanded = false;
             Assert.AreEqual(2, FilesViewModel.RootViewModel.Children.Count());
@@ -49,7 +53,8 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAll_ChildrenAreNotNull()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             void ExpandAndAssert(DirectoryViewModel Directory)
             {
                 Directory.IsExpanded = true;
@@ -65,7 +70,8 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAllAndShrinkRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             void Expand(DirectoryViewModel Directory)
             {
                 Directory.IsExpanded = true;
@@ -85,7 +91,8 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAllAndShrinkRoot_TotalDirectoryCountIs22()
         {
-            var FilesViewModel = new FileHierarchyViewModel(RootDirectoryName);
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
             void Expand(DirectoryViewModel Directory)
             {
                 Directory.IsExpanded = true;
