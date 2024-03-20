@@ -9,6 +9,7 @@
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
         <converters:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
+        <converters:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -32,13 +33,16 @@
                 </TreeView.ItemTemplate>
             </TreeView>
         </StackPanel>
-        <ListView Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=5}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <Label Name="SelectedFileLabel" Grid.Column="1" Content="{Binding SelectedDirectoryName}" VerticalAlignment="Top" Height="26"/>
+        <StackPanel Grid.Column="1">
+            <Label Name="SelectedFileLabel" Content="{Binding SelectedDirectoryName}" VerticalAlignment="Top" Height="26"/>
+            <ListView ItemsSource="{Binding SelectedDirectoryFiles}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                        <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
     </Grid>
 </Window>

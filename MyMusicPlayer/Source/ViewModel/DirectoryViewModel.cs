@@ -25,7 +25,7 @@ namespace MyMusicPlayer.ViewModel
 
         public FileHierarchyViewModel()
         {
-            DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>(new FileHierarchy.DirectoryComparer());
+            DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>(new DirectoryComparer());
             Files = new FileHierarchy();
         }
 

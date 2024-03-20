@@ -9,13 +9,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Diagnostics;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.ObjectModel;
 using MyMusicPlayer.ViewModel;
 using System.Globalization;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
+using System.IO;
 
 namespace MyMusicPlayer
 {
@@ -47,9 +47,15 @@ namespace MyMusicPlayer
     public class FileHierarchyProperties : INotifyPropertyChanged
     {
         private FileHierarchyViewModel? FileHierarchyViewModel;
+
+        // Root directory.
         public DirectoryViewModel? RootDirectoryViewModel { get => FileHierarchyViewModel?.RootViewModel; }
         public string? RootPath { get => RootDirectoryViewModel?.FullName; }
+
+        // Selected directory.
+        public DirectoryViewModel? SelectedDirectoryViewModel { get => FileHierarchyViewModel?.SelectedDirectoryViewModel; }
         public string? SelectedDirectoryName { get => FileHierarchyViewModel?.SelectedDirectoryViewModel?.Name; }
+        public FileInfo[]? SelectedDirectoryFiles { get => SelectedDirectoryViewModel?.Directory.GetFiles("*", SearchOption.TopDirectoryOnly); }
         
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -70,7 +76,9 @@ namespace MyMusicPlayer
         {
             if (e.PropertyName == nameof(FileHierarchyViewModel.SelectedDirectoryViewModel))
             {
+                NotifyPropertyChanged(nameof(SelectedDirectoryViewModel));
                 NotifyPropertyChanged(nameof(SelectedDirectoryName));
+                NotifyPropertyChanged(nameof(SelectedDirectoryFiles));
             }
         }
 
@@ -85,6 +93,19 @@ namespace MyMusicPlayer
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return new object[] { value };
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class FileNameWithoutExtension : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Path.GetFileNameWithoutExtension((value as string) ?? "");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

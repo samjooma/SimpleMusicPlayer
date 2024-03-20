@@ -10,45 +10,9 @@ using static System.Net.WebRequestMethods;
 
 namespace MyMusicPlayer.Model
 {
-    public class DirectoryOpenedEventArgs(DirectoryInfo Directory, DirectoryInfo[] SubDirectories) : EventArgs
-    {
-        public DirectoryInfo Directory = Directory;
-        public DirectoryInfo[] SubDirectories = SubDirectories;
-    }
-
-    public class DirectoryClosedEventArgs(DirectoryInfo Directory) : EventArgs
-    {
-        public DirectoryInfo Directory = Directory;
-    }
-
     public class FileHierarchy
     {
-        public class DirectoryComparer : IEqualityComparer<DirectoryInfo>
-        {
-            public bool Equals(DirectoryInfo? a, DirectoryInfo? b)
-            {
-                if (a == null && b == null) return true;
-                if (a == null || b == null) return false;
-                return a.FullName == b.FullName;
-            }
-
-            public int GetHashCode([DisallowNull] DirectoryInfo obj)
-            {
-                return obj.FullName.GetHashCode();
-            }
-        }
-
         private DirectoryInfo? _rootDirectory;
-        public DirectoryInfo RootDirectory {
-            get
-            {
-                if (_rootDirectory == null)
-                {
-                    throw new ArgumentNullException();
-                }
-                return _rootDirectory;
-            }
-        }
         private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryMap;
 
         public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
@@ -57,6 +21,18 @@ namespace MyMusicPlayer.Model
         public FileHierarchy()
         {
             DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
+        }
+
+        public DirectoryInfo RootDirectory
+        {
+            get
+            {
+                if (_rootDirectory == null)
+                {
+                    throw new ArgumentNullException();
+                }
+                return _rootDirectory;
+            }
         }
 
         public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
@@ -124,5 +100,31 @@ namespace MyMusicPlayer.Model
         {
             return DirectoryMap.Keys.ToArray();
         }
+    }
+
+    public class DirectoryComparer : IEqualityComparer<DirectoryInfo>
+    {
+        public bool Equals(DirectoryInfo? a, DirectoryInfo? b)
+        {
+            if (a == null && b == null) return true;
+            if (a == null || b == null) return false;
+            return a.FullName == b.FullName;
+        }
+
+        public int GetHashCode([DisallowNull] DirectoryInfo obj)
+        {
+            return obj.FullName.GetHashCode();
+        }
+    }
+
+    public class DirectoryOpenedEventArgs(DirectoryInfo Directory, DirectoryInfo[] SubDirectories) : EventArgs
+    {
+        public DirectoryInfo Directory = Directory;
+        public DirectoryInfo[] SubDirectories = SubDirectories;
+    }
+
+    public class DirectoryClosedEventArgs(DirectoryInfo Directory) : EventArgs
+    {
+        public DirectoryInfo Directory = Directory;
     }
 }

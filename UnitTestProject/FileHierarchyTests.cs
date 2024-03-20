@@ -109,9 +109,7 @@ namespace UnitTestProject
             void AssertAndOpen(DirectoryInfo Directory, FileNameTree SubTree)
             {
                 Assert.AreEqual(SubTree.Name, Directory.Name, false);
-
-                Files.OpenDirectory(Directory);
-                var Subdirectories = Files.GetSubDirectories(Directory);
+                var Subdirectories = Files.OpenDirectory(Directory);
                 for (int i = 0; i < Subdirectories.Length; i++)
                 {
                     AssertAndOpen(Subdirectories[i], SubTree.Children[i]);
@@ -128,8 +126,7 @@ namespace UnitTestProject
 
             void Open(DirectoryInfo Directory)
             {
-                Files.OpenDirectory(Directory);
-                foreach (var Subdirectory in Files.GetSubDirectories(Directory))
+                foreach (var Subdirectory in Files.OpenDirectory(Directory))
                 {
                     Open(Subdirectory);
                 }
@@ -149,9 +146,8 @@ namespace UnitTestProject
             var CloseQueue = new List<DirectoryInfo>();
             void Open(DirectoryInfo Directory)
             {
-                Files.OpenDirectory(Directory);
                 CloseQueue.Insert(0, Directory);
-                foreach (var Subdirectory in Files.GetSubDirectories(Directory))
+                foreach (var Subdirectory in Files.OpenDirectory(Directory))
                 {
                     Open(Subdirectory);
                 }
