@@ -108,5 +108,53 @@ namespace UnitTestProject
             FilesViewModel.RootViewModel.IsExpanded = false;
             Assert.AreEqual(22, FilesViewModel.GetAllDirectoryViewModels().Length);
         }
+
+        [TestMethod]
+        public void TrySelectingAllDirectories_OnlyOneIsSelected()
+        {
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
+            void OpenAndSelect(DirectoryViewModel Directory)
+            {
+                FilesViewModel.OpenDirectory(Directory.Directory);
+                Directory.IsSelected = true;
+                if (Directory.Children != null)
+                {
+                    foreach (var Child in Directory.Children)
+                    {
+                        OpenAndSelect(Child);
+                    }
+                }
+            }
+            OpenAndSelect(FilesViewModel.RootViewModel);
+
+            int TotalSelected = FilesViewModel.GetAllDirectoryViewModels().Count(x => x.IsSelected);
+            Assert.AreEqual(1, TotalSelected);
+        }
+
+        [TestMethod]
+        public void TrySelectingAllDirectories_SelectedReferenceIsCorrect()
+        {
+            var FilesViewModel = new FileHierarchyViewModel();
+            FilesViewModel.SetRootDirectory(RootDirectoryName);
+
+            DirectoryViewModel LastSelected;
+            void OpenAndSelect(DirectoryViewModel Directory)
+            {
+                FilesViewModel.OpenDirectory(Directory.Directory);
+                Directory.IsSelected = true;
+                LastSelected = Directory;
+                if (Directory.Children != null)
+                {
+                    foreach (var Child in Directory.Children)
+                    {
+                        OpenAndSelect(Child);
+                    }
+                }
+            }
+            OpenAndSelect(FilesViewModel.RootViewModel);
+
+            Assert.AreSame(LastSelected, FilesViewModel.SelectedDirectoryViewModel);
+        }
     }
 }
