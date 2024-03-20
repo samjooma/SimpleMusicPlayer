@@ -59,28 +59,6 @@ namespace MyMusicPlayer.Model
             DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
         }
 
-        public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
-        {
-            return DirectoryMap[Directory];
-        }
-
-        public DirectoryInfo? GetParent(DirectoryInfo Directory)
-        {
-            try
-            {
-                return DirectoryMap.First(x => x.Value.Contains(Directory)).Key;
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }   
-        }
-
-        public DirectoryInfo[] GetAllOpenDirectories()
-        {
-            return DirectoryMap.Keys.ToArray();
-        }
-
         public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
         {
             if (_rootDirectory == null)
@@ -123,6 +101,28 @@ namespace MyMusicPlayer.Model
             {
                 CloseDirectory(SubDirectory);
             }
+        }
+
+        public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
+        {
+            return DirectoryMap[Directory];
+        }
+
+        public DirectoryInfo? GetParent(DirectoryInfo Directory)
+        {
+            try
+            {
+                return DirectoryMap.First(x => x.Value.Contains(Directory)).Key;
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }   
+        }
+
+        public DirectoryInfo[] GetAllOpenDirectories()
+        {
+            return DirectoryMap.Keys.ToArray();
         }
     }
 }

@@ -24,13 +24,13 @@ namespace MyMusicPlayer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Properties _properties;
+        private FileHierarchyProperties _filesProperties;
 
         public MainWindow()
         {
             InitializeComponent();
-            _properties = new Properties();
-            DataContext = _properties;
+            _filesProperties = new FileHierarchyProperties();
+            DataContext = _filesProperties;
         }
 
         private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
@@ -39,28 +39,44 @@ namespace MyMusicPlayer
             OpenFileDialog.IsFolderPicker = true;
             if (OpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                _properties.CreateFileHierarchy(OpenFileDialog.FileName);
+                _filesProperties.SetRootDirectory(OpenFileDialog.FileName);
             }
         }
     }
 
-    public class Properties : INotifyPropertyChanged
+    public class FileHierarchyProperties : INotifyPropertyChanged
     {
         private FileHierarchyViewModel? FileHierarchyViewModel;
         public DirectoryViewModel? RootDirectoryViewModel { get => FileHierarchyViewModel?.RootViewModel; }
         public string? RootPath { get => RootDirectoryViewModel?.FullName; }
-
+        public string? SelectedDirectoryName { get => FileHierarchyViewModel?.SelectedDirectoryViewModel?.Name; }
+        
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public Properties()
+        public FileHierarchyProperties()
         {
         }
 
-        public void CreateFileHierarchy(string RootPath)
+        public void SetRootDirectory(string RootDirectoryPath)
         {
-            FileHierarchyViewModel = new FileHierarchyViewModel(RootPath);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RootDirectoryViewModel)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RootPath)));
+            FileHierarchyViewModel = new FileHierarchyViewModel();
+            FileHierarchyViewModel.SetRootDirectory(RootDirectoryPath);
+            FileHierarchyViewModel.PropertyChanged += FileHierarchyViewModel_PropertyChanged;
+            NotifyPropertyChanged(nameof(RootDirectoryViewModel));
+            NotifyPropertyChanged(nameof(RootPath));
+        }
+
+        private void FileHierarchyViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FileHierarchyViewModel.SelectedDirectoryViewModel))
+            {
+                NotifyPropertyChanged(nameof(SelectedDirectoryName));
+            }
+        }
+
+        protected virtual void NotifyPropertyChanged(string PropertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
         }
     }
 

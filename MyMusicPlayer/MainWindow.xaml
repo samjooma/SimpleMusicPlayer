@@ -17,10 +17,11 @@
         </Grid.ColumnDefinitions>
         <StackPanel>
             <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
-            <TreeView ItemsSource="{Binding RootDirectoryViewModel, Converter={StaticResource ObjectArrayConverter}}">
+            <TreeView Name="FileHierarchyTreeView" ItemsSource="{Binding RootDirectoryViewModel, Converter={StaticResource ObjectArrayConverter}}">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                         <Setter Property="FontWeight" Value="Normal" />
                     </Style>
                 </TreeView.ItemContainerStyle>
@@ -31,5 +32,13 @@
                 </TreeView.ItemTemplate>
             </TreeView>
         </StackPanel>
+        <ListView Grid.Column="1" d:ItemsSource="{d:SampleData ItemCount=5}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Label Name="SelectedFileLabel" Grid.Column="1" Content="{Binding SelectedDirectoryName}" VerticalAlignment="Top" Height="26"/>
     </Grid>
 </Window>

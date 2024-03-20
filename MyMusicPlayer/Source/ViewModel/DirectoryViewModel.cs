@@ -14,15 +14,37 @@ using System.Diagnostics;
 
 namespace MyMusicPlayer.ViewModel
 {
-    public class FileHierarchyViewModel
+    public class FileHierarchyViewModel : INotifyPropertyChanged
     {
         private FileHierarchy Files { get; set; }
         private Dictionary<DirectoryInfo, DirectoryViewModel> DirectoryViewModels { get; set; }
+        private DirectoryViewModel? _selectedDirectoryViewModel;
         public DirectoryViewModel RootViewModel { get => DirectoryViewModels[Files.RootDirectory]; }
 
-        public FileHierarchyViewModel(string RootDirectoryPath)
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public FileHierarchyViewModel()
         {
             DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>(new FileHierarchy.DirectoryComparer());
+            Files = new FileHierarchy();
+        }
+
+        public DirectoryViewModel? SelectedDirectoryViewModel
+        {
+            get => _selectedDirectoryViewModel;
+            private set
+            {
+                if (value != _selectedDirectoryViewModel)
+                {
+                    _selectedDirectoryViewModel = value;
+                    NotifyPropertyChanged(nameof(SelectedDirectoryViewModel));
+                }
+            }
+        }
+
+        public void SetRootDirectory(string RootDirectoryPath)
+        {
+            DirectoryViewModels.Clear();
             Files = new FileHierarchy();
             Files.AfterDirectoryOpened += Files_AfterDirectoryOpened;
             Files.AfterDirectoryClosed += Files_AfterDirectoryClosed;
@@ -44,21 +66,58 @@ namespace MyMusicPlayer.ViewModel
             Files.OpenDirectory(Directory);
         }
 
+        private void TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)
+        {
+            if (DirectoryViewModels.TryAdd(Key, Value))
+            {
+                Value.PropertyChanged += DirectoryViewModel_PropertyChanged;
+            }
+        }
+
+        private void DirectoryViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is DirectoryViewModel ChangedDirectory)
+            {
+                if (e.PropertyName == nameof(ChangedDirectory.IsSelected))
+                {
+                    if (ChangedDirectory.IsSelected)
+                    {
+                        // Deselect currently selected directory.
+                        if (SelectedDirectoryViewModel != null)
+                        {
+                            SelectedDirectoryViewModel.IsSelected = false;
+                        }
+                        // Set reference to new selected object.
+                        SelectedDirectoryViewModel = ChangedDirectory;
+                    }
+                    else
+                    {
+                        SelectedDirectoryViewModel = null;
+                    }
+                }
+            }
+        }
+
         private void Files_AfterDirectoryOpened(object? sender, DirectoryOpenedEventArgs e)
         {
             // Viewmodels for subdirectories.
             foreach (DirectoryInfo Subdirectory in e.SubDirectories)
             {
-                DirectoryViewModels.TryAdd(Subdirectory, new DirectoryViewModel(this, Subdirectory));
+                TryAddDirectoryViewModel(Subdirectory, new DirectoryViewModel(this, Subdirectory));
             }
             var Children = new ObservableCollection<DirectoryViewModel>(e.SubDirectories.Select(x => DirectoryViewModels[x]));
 
             // Viewmodel for directory.
-            DirectoryViewModels.TryAdd(e.Directory, new DirectoryViewModel(this, e.Directory));
+            TryAddDirectoryViewModel(e.Directory, new DirectoryViewModel(this, e.Directory));
         }
 
         private void Files_AfterDirectoryClosed(object? sender, DirectoryClosedEventArgs e)
         {
+        }
+
+        protected virtual void NotifyPropertyChanged(string PropertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
         }
     }
 
@@ -67,6 +126,7 @@ namespace MyMusicPlayer.ViewModel
         public DirectoryInfo Directory { get; private set; }
         private FileHierarchyViewModel OwnerHierarchy;
         private bool _isExpanded;
+        private bool _isSelected;
 
         public IEnumerable<DirectoryViewModel> Children { get => OwnerHierarchy.GetChildren(this); }
         public string Name { get => Directory.Name; }
@@ -101,7 +161,20 @@ namespace MyMusicPlayer.ViewModel
                 }
             }
         }
-        
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (value != _isSelected)
+                {
+                    _isSelected = value;
+                    NotifyPropertyChanged(nameof(IsSelected));
+                }
+            }
+        }
+
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
