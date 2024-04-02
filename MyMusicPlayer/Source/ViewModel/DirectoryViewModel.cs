@@ -19,16 +19,6 @@ namespace MyMusicPlayer.ViewModel
         private FileHierarchy Files { get; set; }
         private Dictionary<DirectoryInfo, DirectoryViewModel> DirectoryViewModels { get; set; }
         private DirectoryViewModel? _selectedDirectoryViewModel;
-        public DirectoryViewModel RootViewModel { get => DirectoryViewModels[Files.RootDirectory]; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public FileHierarchyViewModel()
-        {
-            DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>(new DirectoryComparer());
-            Files = new FileHierarchy();
-        }
-
         public DirectoryViewModel? SelectedDirectoryViewModel
         {
             get => _selectedDirectoryViewModel;
@@ -40,6 +30,16 @@ namespace MyMusicPlayer.ViewModel
                     NotifyPropertyChanged(nameof(SelectedDirectoryViewModel));
                 }
             }
+        }
+
+        public DirectoryViewModel RootViewModel { get => DirectoryViewModels[Files.RootDirectory]; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public FileHierarchyViewModel()
+        {
+            DirectoryViewModels = new Dictionary<DirectoryInfo, DirectoryViewModel>(new DirectoryComparer());
+            Files = new FileHierarchy();
         }
 
         public void SetRootDirectory(string RootDirectoryPath)
@@ -56,14 +56,14 @@ namespace MyMusicPlayer.ViewModel
             return DirectoryViewModels.Values.ToArray();
         }
 
-        public IEnumerable<DirectoryViewModel> GetChildren(DirectoryViewModel Directory)
+        public IEnumerable<DirectoryViewModel> GetChildren(DirectoryViewModel DirectoryViewModel)
         {
-            return Files.GetSubDirectories(Directory.Directory).Select(x => DirectoryViewModels[x]);
+            return Files.GetSubDirectories(DirectoryViewModel.Directory).Select(x => DirectoryViewModels[x]);
         }
 
-        public void OpenDirectory(DirectoryInfo Directory)
+        public void OpenDirectory(DirectoryViewModel DirectoryViewModel)
         {
-            Files.OpenDirectory(Directory);
+            Files.OpenDirectory(DirectoryViewModel.Directory);
         }
 
         private void TryAddDirectoryViewModel(DirectoryInfo Key, DirectoryViewModel Value)
@@ -109,6 +109,9 @@ namespace MyMusicPlayer.ViewModel
 
             // Viewmodel for directory.
             TryAddDirectoryViewModel(e.Directory, new DirectoryViewModel(this, e.Directory));
+
+            NotifyPropertyChanged(nameof(DirectoryViewModels));
+            NotifyPropertyChanged(nameof(RootViewModel));
         }
 
         private void Files_AfterDirectoryClosed(object? sender, DirectoryClosedEventArgs e)
@@ -123,24 +126,9 @@ namespace MyMusicPlayer.ViewModel
 
     public class DirectoryViewModel : INotifyPropertyChanged
     {
-        public DirectoryInfo Directory { get; private set; }
+        internal DirectoryInfo Directory { get; private set; }
         private FileHierarchyViewModel OwnerHierarchy;
         private bool _isExpanded;
-        private bool _isSelected;
-
-        public IEnumerable<DirectoryViewModel> Children { get => OwnerHierarchy.GetChildren(this); }
-        public string Name { get => Directory.Name; }
-        public string FullName { get => Directory.FullName; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public DirectoryViewModel(FileHierarchyViewModel Owner, DirectoryInfo Directory)
-        {
-            OwnerHierarchy = Owner;
-            this.Directory = Directory;
-            _isExpanded = false;
-        }
-
         public bool IsExpanded
         {
             get => _isExpanded;
@@ -155,13 +143,13 @@ namespace MyMusicPlayer.ViewModel
                     {
                         foreach (DirectoryViewModel Child in Children)
                         {
-                            OwnerHierarchy.OpenDirectory(Child.Directory);
+                            OwnerHierarchy.OpenDirectory(Child);
                         }
                     }
                 }
             }
         }
-
+        private bool _isSelected;
         public bool IsSelected
         {
             get => _isSelected;
@@ -173,6 +161,21 @@ namespace MyMusicPlayer.ViewModel
                     NotifyPropertyChanged(nameof(IsSelected));
                 }
             }
+        }
+        public FileInfo[] Files { get; private set; }
+
+        public IEnumerable<DirectoryViewModel> Children { get => OwnerHierarchy.GetChildren(this); }
+        public string Name { get => Directory.Name; }
+        public string FullName { get => Directory.FullName; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public DirectoryViewModel(FileHierarchyViewModel Owner, DirectoryInfo Directory)
+        {
+            OwnerHierarchy = Owner;
+            this.Directory = Directory;
+            _isExpanded = false;
+            Files = Directory.GetFiles("*", SearchOption.TopDirectoryOnly);
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)

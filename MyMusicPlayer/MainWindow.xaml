@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:MyMusicPlayer"
         xmlns:converters="clr-namespace:MyMusicPlayer"  
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <converters:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
         <converters:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
@@ -18,7 +19,9 @@
         </Grid.ColumnDefinitions>
         <StackPanel>
             <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
-            <TreeView Name="FileHierarchyTreeView" ItemsSource="{Binding RootDirectoryViewModel, Converter={StaticResource ObjectArrayConverter}}">
+            <TreeView
+                Name="FileHierarchyTreeView"
+                ItemsSource="{Binding Path=FilesViewModel.RootViewModel, Converter={StaticResource ObjectArrayConverter}}">
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -34,8 +37,8 @@
             </TreeView>
         </StackPanel>
         <StackPanel Grid.Column="1">
-            <Label Name="SelectedFileLabel" Content="{Binding SelectedDirectoryName}" VerticalAlignment="Top" Height="26"/>
-            <ListView ItemsSource="{Binding SelectedDirectoryFiles}">
+            <Label Name="SelectedFileLabel" Content="{Binding FilesViewModel.SelectedDirectoryViewModel.Name}" VerticalAlignment="Top" Height="26"/>
+            <ListView ItemsSource="{Binding FilesViewModel.SelectedDirectoryViewModel.Files}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>

@@ -13,6 +13,14 @@ namespace MyMusicPlayer.Model
     public class FileHierarchy
     {
         private DirectoryInfo? _rootDirectory;
+        public DirectoryInfo RootDirectory
+        {
+            get
+            {
+                if (_rootDirectory == null) { throw new ArgumentNullException(); }
+                return _rootDirectory;
+            }
+        }
         private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryMap;
 
         public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
@@ -21,18 +29,6 @@ namespace MyMusicPlayer.Model
         public FileHierarchy()
         {
             DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
-        }
-
-        public DirectoryInfo RootDirectory
-        {
-            get
-            {
-                if (_rootDirectory == null)
-                {
-                    throw new ArgumentNullException();
-                }
-                return _rootDirectory;
-            }
         }
 
         public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
@@ -78,7 +74,7 @@ namespace MyMusicPlayer.Model
                 CloseDirectory(SubDirectory);
             }
         }
-
+        
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
         {
             return DirectoryMap[Directory];
