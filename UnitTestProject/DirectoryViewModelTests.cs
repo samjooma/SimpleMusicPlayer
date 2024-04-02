@@ -116,7 +116,7 @@ namespace UnitTestProject
             FilesViewModel.SetRootDirectory(RootDirectoryName);
             void OpenAndSelect(DirectoryViewModel Directory)
             {
-                FilesViewModel.OpenDirectory(Directory.Directory);
+                FilesViewModel.OpenDirectory(Directory);
                 Directory.IsSelected = true;
                 if (Directory.Children != null)
                 {
@@ -141,7 +141,7 @@ namespace UnitTestProject
             DirectoryViewModel LastSelected;
             void OpenAndSelect(DirectoryViewModel Directory)
             {
-                FilesViewModel.OpenDirectory(Directory.Directory);
+                FilesViewModel.OpenDirectory(Directory);
                 Directory.IsSelected = true;
                 LastSelected = Directory;
                 if (Directory.Children != null)
