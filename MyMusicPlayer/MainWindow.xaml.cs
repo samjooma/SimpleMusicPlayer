@@ -24,7 +24,7 @@ namespace MyMusicPlayer
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public FileHierarchyViewModel? FilesViewModel { get; private set; }
+        public DirectoryHierarchy? Directories { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -45,9 +45,9 @@ namespace MyMusicPlayer
 
         public void SetRootDirectory(string RootDirectoryPath)
         {
-            FilesViewModel = new FileHierarchyViewModel();
-            FilesViewModel.SetRootDirectory(RootDirectoryPath);
-            NotifyPropertyChanged(nameof(FilesViewModel));
+            Directories = new DirectoryHierarchy();
+            Directories.SetRootDirectory(RootDirectoryPath);
+            NotifyPropertyChanged(nameof(Directories));
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)

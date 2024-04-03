@@ -76,7 +76,7 @@ namespace UnitTestProject
         [TestMethod]
         public void CreateRoot_NameIsValid()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
             Assert.AreEqual(RootDirectoryName, Files.RootDirectory.Name, false);
         }
@@ -84,7 +84,7 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenRootSubDirectories_ContainsTwo()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
             var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
             Assert.AreEqual(2, SubDirectories.Length);
@@ -93,7 +93,7 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenRootSubDirectories_NameIsValid()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
             var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
             Assert.AreEqual("Kevin MacLeod", SubDirectories[0].Name, false);
@@ -103,7 +103,7 @@ namespace UnitTestProject
         [DynamicData(nameof(AllDirectoriesNameTree))]
         public void OpenAllDirectories_NamesAreValid(FileNameTree ExpectedNameTree)
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
 
             void AssertAndOpen(DirectoryInfo Directory, FileNameTree SubTree)
@@ -121,7 +121,7 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenAllDirectories_CloseRootSubDirectories_DirectoryCountIsOne()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
 
             void Open(DirectoryInfo Directory)
@@ -140,7 +140,7 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenAllDirectories_CloseInReverse_DirectoryCountIsOne()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
 
             var CloseQueue = new List<DirectoryInfo>();
@@ -164,7 +164,7 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenRootCloseRoot_ThrowArgumentException()
         {
-            var Files = new FileHierarchy();
+            var Files = new DirectoryHierarchy();
             Files.OpenDirectory(RootDirectoryName);
             try
             {

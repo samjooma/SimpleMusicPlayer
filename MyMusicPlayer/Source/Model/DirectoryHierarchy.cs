@@ -10,7 +10,7 @@ using static System.Net.WebRequestMethods;
 
 namespace MyMusicPlayer.Model
 {
-    public class FileHierarchy
+    public class DirectoryHierarchy
     {
         private DirectoryInfo? _rootDirectory;
         public DirectoryInfo RootDirectory
@@ -21,14 +21,14 @@ namespace MyMusicPlayer.Model
                 return _rootDirectory;
             }
         }
-        private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryMap;
+        private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryTree;
 
         public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
         public event EventHandler<DirectoryClosedEventArgs>? AfterDirectoryClosed;
 
-        public FileHierarchy()
+        public DirectoryHierarchy()
         {
-            DirectoryMap = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
+            DirectoryTree = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
         }
 
         public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
@@ -38,9 +38,9 @@ namespace MyMusicPlayer.Model
                 _rootDirectory = Directory;
             }
 
-            DirectoryMap[Directory] = Directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
-            AfterDirectoryOpened?.Invoke(this, new DirectoryOpenedEventArgs(Directory, DirectoryMap[Directory]));
-            return DirectoryMap[Directory];
+            DirectoryTree[Directory] = Directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
+            AfterDirectoryOpened?.Invoke(this, new DirectoryOpenedEventArgs(Directory));
+            return DirectoryTree[Directory];
         }
 
         public DirectoryInfo[] OpenDirectory(string DirectoryPath)
@@ -56,14 +56,14 @@ namespace MyMusicPlayer.Model
             }
 
             // Close children recursively.
-            foreach (var Subdirectory in DirectoryMap[Directory])
+            foreach (var Subdirectory in DirectoryTree[Directory])
             {
-                if (DirectoryMap.ContainsKey(Subdirectory))
+                if (DirectoryTree.ContainsKey(Subdirectory))
                 {
                     CloseDirectory(Subdirectory);
                 }
             }
-            DirectoryMap.Remove(Directory);
+            DirectoryTree.Remove(Directory);
             AfterDirectoryClosed?.Invoke(this, new DirectoryClosedEventArgs(Directory));
         }
 
@@ -77,14 +77,14 @@ namespace MyMusicPlayer.Model
         
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
         {
-            return DirectoryMap[Directory];
+            return DirectoryTree[Directory];
         }
 
         public DirectoryInfo? GetParent(DirectoryInfo Directory)
         {
             try
             {
-                return DirectoryMap.First(x => x.Value.Contains(Directory)).Key;
+                return DirectoryTree.First(x => x.Value.Contains(Directory)).Key;
             }
             catch (InvalidOperationException)
             {
@@ -94,7 +94,7 @@ namespace MyMusicPlayer.Model
 
         public DirectoryInfo[] GetAllOpenDirectories()
         {
-            return DirectoryMap.Keys.ToArray();
+            return DirectoryTree.Keys.ToArray();
         }
     }
 
@@ -113,10 +113,9 @@ namespace MyMusicPlayer.Model
         }
     }
 
-    public class DirectoryOpenedEventArgs(DirectoryInfo Directory, DirectoryInfo[] SubDirectories) : EventArgs
+    public class DirectoryOpenedEventArgs(DirectoryInfo Directory) : EventArgs
     {
-        public DirectoryInfo Directory = Directory;
-        public DirectoryInfo[] SubDirectories = SubDirectories;
+        public DirectoryInfo OpenedDirectory = Directory;
     }
 
     public class DirectoryClosedEventArgs(DirectoryInfo Directory) : EventArgs
