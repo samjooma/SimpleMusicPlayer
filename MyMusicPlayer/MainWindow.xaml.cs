@@ -58,7 +58,7 @@ namespace MyMusicPlayer
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            Player.TogglePause();
+            Player.IsPaused = !Player.IsPaused;
         }
 
         private void ListView_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)

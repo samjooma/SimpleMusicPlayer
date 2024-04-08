@@ -33,11 +33,19 @@ namespace MyMusicPlayer.ViewModel
         public bool IsPaused
         {
             get => _isPaused;
-            private set
+            set
             {
                 if (value != _isPaused)
                 {
                     _isPaused = value;
+                    if (_isPaused)
+                    {
+                        Player.Pause();
+                    }
+                    else
+                    {
+                        Player.Play();
+                    }
                     NotifyPropertyChanged(nameof(IsPaused));
                 }
             }
@@ -63,20 +71,6 @@ namespace MyMusicPlayer.ViewModel
             ActiveFile = File;
             Player.Play();
             IsPaused = false;
-        }
-
-        public void TogglePause()
-        {
-            if (IsPaused)
-            {
-                Player.Play();
-                IsPaused = false;
-            }
-            else
-            {
-                Player.Pause();
-                IsPaused = true;
-            }
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)
