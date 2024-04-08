@@ -12,7 +12,6 @@ using System.Windows.Navigation;
 using System.Diagnostics;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.ObjectModel;
-using MyMusicPlayer.ViewModel;
 using System.Globalization;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 using System.IO;
@@ -24,12 +23,14 @@ namespace MyMusicPlayer
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public DirectoryHierarchy? Directories { get; private set; }
+        public ViewModel.DirectoryHierarchy? Directories { get; private set; }
+        public ViewModel.SoundPlayer Player { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindow()
         {
+            Player = new ViewModel.SoundPlayer();
             InitializeComponent();
         }
 
@@ -45,7 +46,7 @@ namespace MyMusicPlayer
 
         public void SetRootDirectory(string RootDirectoryPath)
         {
-            Directories = new DirectoryHierarchy();
+            Directories = new ViewModel.DirectoryHierarchy();
             Directories.SetRootDirectory(RootDirectoryPath);
             NotifyPropertyChanged(nameof(Directories));
         }
@@ -53,6 +54,22 @@ namespace MyMusicPlayer
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
+
+        private void PauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Player.TogglePause();
+        }
+
+        private void ListView_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListView Item)
+            {
+                if (Item.SelectedItem is FileInfo File)
+                {
+                    Player.PlayFile(File);
+                }
+            }
         }
     }
 
@@ -79,6 +96,24 @@ namespace MyMusicPlayer
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class BooleanConverter : IValueConverter
+    {
+        public string FalseValue { get; set; }
+        public string TrueValue { get; set; }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return FalseValue!;
+            return (bool)value ? TrueValue! : FalseValue!;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return false;
+            return value.Equals(TrueValue);
         }
     }
 }

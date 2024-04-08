@@ -4,48 +4,59 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyMusicPlayer"
-        xmlns:converters="clr-namespace:MyMusicPlayer"  
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Window.Resources>
-        <converters:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
-        <converters:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
+        <local:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
+        <local:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
+        <local:BooleanConverter x:Key="BooleanToPauseResume" FalseValue="Pause" TrueValue="Resume"/>
     </Window.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel>
-            <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
-            <TreeView
-                Name="FileHierarchyTreeView"
-                ItemsSource="{Binding Path=Directories.RootDirectory, Converter={StaticResource ObjectArrayConverter}}">
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="{x:Type TreeViewItem}">
-                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                        <Setter Property="FontWeight" Value="Normal" />
-                    </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                        <TextBlock Text="{Binding Name}" />
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-        </StackPanel>
-        <StackPanel Grid.Column="1">
-            <Label Name="SelectedFileLabel" Content="{Binding Directories.SelectedDirectory.Name}" VerticalAlignment="Top" Height="26"/>
-            <ListView ItemsSource="{Binding Directories.SelectedDirectory.Files}">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
-                        <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
+                <TreeView
+                    Name="FileHierarchyTreeView"
+                    ItemsSource="{Binding Path=Directories.RootDirectory, Converter={StaticResource ObjectArrayConverter}}">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <Label Name="SelectedFileLabel" Content="{Binding Directories.SelectedDirectory.Name}" VerticalAlignment="Top" Height="26"/>
+                <ListView ItemsSource="{Binding Directories.SelectedDirectory.Files}" PreviewMouseDoubleClick="ListView_PreviewMouseDoubleClick">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                            <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="1">
+            <Separator/>
+            <Button Name="PauseButton" Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click"/>
+            <Label Name="PlayingSongLabel" Content="{Binding Player.ActiveFileName}"/>
         </StackPanel>
     </Grid>
 </Window>
