@@ -16,7 +16,8 @@ namespace MyMusicPlayer.ViewModel
     {
         private MediaPlayer Player;
 
-        private ObservableCollection<FileInfo> PlayList;
+        public ObservableCollection<FileInfo> PlayList { get; private set; }
+
         private int? _activePlayListIndex;
         public int? ActivePlayListIndex
         {
@@ -30,8 +31,6 @@ namespace MyMusicPlayer.ViewModel
                 }
             }
         }
-
-        public IEnumerable<string> PlaylistFileNames { get => PlayList.Select(x => x.Name); }
 
         private bool _isPaused;
         public bool IsPaused
@@ -62,13 +61,7 @@ namespace MyMusicPlayer.ViewModel
             Player = new MediaPlayer();
             Player.MediaEnded += Player_MediaEnded;
             PlayList = new ObservableCollection<FileInfo>();
-            PlayList.CollectionChanged += PlayList_CollectionChanged;
             _isPaused = true;
-        }
-
-        private void PlayList_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            NotifyPropertyChanged(nameof(PlaylistFileNames));
         }
 
         private void Player_MediaEnded(object? sender, EventArgs e)

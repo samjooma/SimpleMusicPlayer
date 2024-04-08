@@ -54,10 +54,11 @@
                 </ListView>
             </StackPanel>
             <StackPanel Grid.Column="2">
-                <ListView ItemsSource="{Binding Player.PlaylistFileNames}">
+                <ListView ItemsSource="{Binding Player.PlayList}">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding}"/>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                            <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
                         </GridView>
                     </ListView.View>
                 </ListView>
