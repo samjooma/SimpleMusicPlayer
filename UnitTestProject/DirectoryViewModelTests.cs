@@ -1,5 +1,4 @@
-﻿using MyMusicPlayer.Model;
-using MyMusicPlayer.ViewModel;
+﻿using MyMusicPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +54,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void ExpandAndAssert(Directory Directory)
+            void ExpandAndAssert(MyMusicPlayer.ViewModel.Directory Directory)
             {
                 Directory.IsExpanded = true;
                 Assert.IsNotNull(Directory.Children);
@@ -72,7 +71,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(Directory Directory)
+            void Expand(MyMusicPlayer.ViewModel.Directory Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -93,7 +92,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(Directory Directory)
+            void Expand(MyMusicPlayer.ViewModel.Directory Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -114,16 +113,13 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void OpenAndSelect(Directory Directory)
+            void OpenAndSelect(MyMusicPlayer.ViewModel.Directory Directory)
             {
-                FilesViewModel.OpenDirectory(Directory);
+                Directory.IsExpanded = true;
                 Directory.IsSelected = true;
-                if (Directory.Children != null)
+                foreach (var Child in Directory.Children)
                 {
-                    foreach (var Child in Directory.Children)
-                    {
-                        OpenAndSelect(Child);
-                    }
+                    OpenAndSelect(Child);
                 }
             }
             OpenAndSelect(FilesViewModel.RootDirectory);
@@ -139,17 +135,14 @@ namespace UnitTestProject
             FilesViewModel.SetRootDirectory(RootDirectoryName);
 
             MyMusicPlayer.ViewModel.Directory LastSelected;
-            void OpenAndSelect(Directory Directory)
+            void OpenAndSelect(MyMusicPlayer.ViewModel.Directory Directory)
             {
-                FilesViewModel.OpenDirectory(Directory);
+                Directory.IsExpanded = true;
                 Directory.IsSelected = true;
                 LastSelected = Directory;
-                if (Directory.Children != null)
+                foreach (var Child in Directory.Children)
                 {
-                    foreach (var Child in Directory.Children)
-                    {
-                        OpenAndSelect(Child);
-                    }
+                    OpenAndSelect(Child);
                 }
             }
             OpenAndSelect(FilesViewModel.RootDirectory);
