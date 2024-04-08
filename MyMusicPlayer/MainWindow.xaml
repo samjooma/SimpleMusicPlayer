@@ -21,6 +21,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <Button Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
@@ -48,6 +49,15 @@
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
                             <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <ListView ItemsSource="{Binding Player.PlaylistFileNames}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding}"/>
                         </GridView>
                     </ListView.View>
                 </ListView>

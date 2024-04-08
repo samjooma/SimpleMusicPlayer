@@ -24,13 +24,13 @@ namespace MyMusicPlayer
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public ViewModel.DirectoryHierarchy? Directories { get; private set; }
-        public ViewModel.SoundPlayer Player { get; private set; }
+        public ViewModel.AudioPlayer Player { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindow()
         {
-            Player = new ViewModel.SoundPlayer();
+            Player = new ViewModel.AudioPlayer();
             InitializeComponent();
         }
 

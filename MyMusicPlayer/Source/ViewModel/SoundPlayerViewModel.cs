@@ -8,26 +8,30 @@ using System.IO;
 using System.Numerics;
 using System.Windows;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace MyMusicPlayer.ViewModel
 {
-    public class SoundPlayer : INotifyPropertyChanged
+    public class AudioPlayer : INotifyPropertyChanged
     {
         private MediaPlayer Player;
-        private FileInfo? _activeFile;
-        private FileInfo? ActiveFile // Note: This is private on purpose.
+
+        private ObservableCollection<FileInfo> PlayList;
+        private int? _activePlayListIndex;
+        public int? ActivePlayListIndex
         {
-            get => _activeFile;
-            set
+            get => _activePlayListIndex;
+            private set
             {
-                if (value != _activeFile)
+                if (value != _activePlayListIndex)
                 {
-                    _activeFile = value;
-                    NotifyPropertyChanged(nameof(ActiveFileName));
+                    _activePlayListIndex = value;
+                    NotifyPropertyChanged(nameof(ActivePlayListIndex));
                 }
             }
         }
-        public string ActiveFileName { get => ActiveFile != null ? ActiveFile.Name : ""; }
+
+        public IEnumerable<string> PlaylistFileNames { get => PlayList.Select(x => x.Name); }
 
         private bool _isPaused;
         public bool IsPaused
@@ -53,22 +57,33 @@ namespace MyMusicPlayer.ViewModel
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public SoundPlayer()
+        public AudioPlayer()
         {
             Player = new MediaPlayer();
             Player.MediaEnded += Player_MediaEnded;
+            PlayList = new ObservableCollection<FileInfo>();
+            PlayList.CollectionChanged += PlayList_CollectionChanged;
             _isPaused = true;
+        }
+
+        private void PlayList_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(PlaylistFileNames));
         }
 
         private void Player_MediaEnded(object? sender, EventArgs e)
         {
-            ActiveFile = null;
+            if (ActivePlayListIndex != null)
+            {
+                ActivePlayListIndex = PlayList.Count > 0 ? (ActivePlayListIndex + 1) % PlayList.Count : null;
+            }
         }
 
         public void PlayFile(FileInfo File)
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
-            ActiveFile = File;
+            PlayList.Add(File);
+            ActivePlayListIndex = PlayList.Count - 1;
             Player.Play();
             IsPaused = false;
         }
