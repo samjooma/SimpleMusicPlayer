@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualBasic;
-using MyMusicPlayer.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,34 +10,35 @@ using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 using MS.WindowsAPICodePack.Internal;
 using System.Diagnostics;
+using System.Windows.Input;
 
 namespace MyMusicPlayer.ViewModel
 {
-    public class DirectoryHierarchy : INotifyPropertyChanged
+    public class DirectoryTree : INotifyPropertyChanged
     {
         private Model.DirectoryHierarchy DirectoryData { get; set; }
-        private Dictionary<DirectoryInfo, Directory> DirectoryMap { get; set; }
-        private Directory? _selectedDirectory;
-        public Directory? SelectedDirectory
+        private Dictionary<DirectoryInfo, FileTreeDirectory> DirectoryMap { get; set; }
+        private FileTreeItem? _selectedItem;
+        public FileTreeItem? SelectedItem
         {
-            get => _selectedDirectory;
+            get => _selectedItem;
             private set
             {
-                if (value != _selectedDirectory)
+                if (value != _selectedItem)
                 {
-                    _selectedDirectory = value;
-                    NotifyPropertyChanged(nameof(SelectedDirectory));
+                    _selectedItem = value;
+                    NotifyPropertyChanged(nameof(SelectedItem));
                 }
             }
         }
 
-        public Directory RootDirectory { get => DirectoryMap[DirectoryData.RootDirectory]; }
+        public FileTreeDirectory RootDirectory { get => DirectoryMap[DirectoryData.RootDirectory]; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public DirectoryHierarchy()
+        public DirectoryTree()
         {
-            DirectoryMap = new Dictionary<DirectoryInfo, Directory>(new DirectoryComparer());
+            DirectoryMap = new Dictionary<DirectoryInfo, FileTreeDirectory>(new Model.DirectoryComparer());
             DirectoryData = new Model.DirectoryHierarchy();
         }
 
@@ -46,19 +46,24 @@ namespace MyMusicPlayer.ViewModel
         {
             DirectoryMap.Clear();
             DirectoryData = new Model.DirectoryHierarchy();
+
+            var RootDirectory = new DirectoryInfo(RootDirectoryPath);
+            TryAddToDirectoryDictionary(RootDirectory);
+
             DirectoryData.AfterDirectoryOpened += DirectoryData_AfterDirectoryOpened;
             DirectoryData.AfterDirectoryClosed += DirectoryData_AfterDirectoryClosed;
-            DirectoryData.OpenDirectory(RootDirectoryPath);
+            DirectoryData.OpenDirectory(RootDirectory);
         }
 
-        public Directory[] GetAllDirectories()
+        //TODO: This function is bad.
+        public FileTreeDirectory[] GetAllDirectories()
         {
             return DirectoryMap.Values.ToArray();
         }
 
-        private void TryAddNewDirectory(DirectoryInfo Key)
+        private void TryAddToDirectoryDictionary(DirectoryInfo Key)
         {
-            var Value = new Directory(Key);
+            var Value = new FileTreeDirectory(Key.Name);
             if (DirectoryMap.TryAdd(Key, Value))
             {
                 Value.PropertyChanged += Directory_PropertyChanged;
@@ -67,30 +72,43 @@ namespace MyMusicPlayer.ViewModel
 
         private void Directory_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not Directory ChangedDirectory) return;
+            if (sender is not FileTreeDirectory ChangedDirectory) return;
             switch (e.PropertyName)
             {
                 case nameof(ChangedDirectory.IsSelected):
                     if (ChangedDirectory.IsSelected)
                     {
                         // Deselect currently selected directory.
-                        if (SelectedDirectory != null)
+                        if (SelectedItem != null)
                         {
-                            SelectedDirectory.IsSelected = false;
+                            SelectedItem.IsSelected = false;
                         }
                         // Set reference to new selected object.
-                        SelectedDirectory = ChangedDirectory;
+                        SelectedItem = ChangedDirectory;
                     }
                     else
                     {
-                        SelectedDirectory = null;
+                        SelectedItem = null;
                     }
                     break;
                 case nameof(ChangedDirectory.IsExpanded):
+                    // Open child diectories.
                     foreach (var Child in ChangedDirectory.Children)
                     {
-                        DirectoryInfo Key = DirectoryMap.First(x => x.Value == Child).Key;
-                        DirectoryData.OpenDirectory(Key);
+                        DirectoryInfo? ChildDirectoryInfo = null;
+                        foreach (var Pair in DirectoryMap)
+                        {
+                            if (Pair.Value == Child)
+                            {
+                                ChildDirectoryInfo = Pair.Key;
+                                break;
+                            }
+                        }
+
+                        if (ChildDirectoryInfo != null)
+                        {
+                            DirectoryData.OpenDirectory(ChildDirectoryInfo);
+                        }
                     }
                     break;
                 default:
@@ -98,21 +116,37 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
-        private void DirectoryData_AfterDirectoryOpened(object? sender, DirectoryOpenedEventArgs e)
+        private void DirectoryData_AfterDirectoryOpened(object? sender, Model.DirectoryOpenedEventArgs e)
         {
-            TryAddNewDirectory(e.OpenedDirectory);
-            DirectoryMap[e.OpenedDirectory].Children.Clear();
+            IEnumerable<FileInfo> MusicFiles = e.OpenedDirectory.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
+            IEnumerable<FileInfo> PlayListFiles = e.OpenedDirectory.GetFiles("*.m3u", SearchOption.TopDirectoryOnly);
+
+            FileTreeDirectory OpenedDirectory = DirectoryMap[e.OpenedDirectory];
+
+            // Add child directories.
+            OpenedDirectory.Children.Clear();
             foreach (DirectoryInfo SubDirectory in DirectoryData.GetSubDirectories(e.OpenedDirectory))
             {
-                TryAddNewDirectory(SubDirectory);
-                DirectoryMap[e.OpenedDirectory].Children.Add(DirectoryMap[SubDirectory]);
+                TryAddToDirectoryDictionary(SubDirectory);
+                OpenedDirectory.Children.Add(DirectoryMap[SubDirectory]);
+            }
+            // Add playlists.
+            foreach (FileInfo PlaylistFile in PlayListFiles)
+            {
+                OpenedDirectory.Children.Add(new FileTreePlaylist(PlaylistFile.Name));
+            }
+
+            // Add files.
+            OpenedDirectory.Files.Clear();
+            foreach (var File in MusicFiles)
+            {
+                OpenedDirectory.Files.Add(File);
             }
 
             NotifyPropertyChanged(nameof(DirectoryMap));
-            NotifyPropertyChanged(nameof(RootDirectory));
         }
 
-        private void DirectoryData_AfterDirectoryClosed(object? sender, DirectoryClosedEventArgs e)
+        private void DirectoryData_AfterDirectoryClosed(object? sender, Model.DirectoryClosedEventArgs e)
         {
         }
 
@@ -122,21 +156,8 @@ namespace MyMusicPlayer.ViewModel
         }
     }
 
-    public class Directory : INotifyPropertyChanged
+    public class FileTreeItem : INotifyPropertyChanged
     {
-        private bool _isExpanded;
-        public bool IsExpanded
-        {
-            get => _isExpanded;
-            set
-            {
-                if (value != _isExpanded)
-                {
-                    _isExpanded = value;
-                    NotifyPropertyChanged(nameof(IsExpanded));
-                }
-            }
-        }
         private bool _isSelected;
         public bool IsSelected
         {
@@ -152,32 +173,52 @@ namespace MyMusicPlayer.ViewModel
         }
 
         public string Name { get; private set; }
-        public string FullName { get; private set; }
-
-        public List<FileInfo> Files { get; private set; }
-        public ObservableCollection<Directory> Children { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public Directory(string Name, string FullName, List<FileInfo> Files)
+        public FileTreeItem(string Name)
         {
-            _isExpanded = false;
             _isSelected = false;
-            Children = new ObservableCollection<Directory>();
             this.Name = Name;
-            this.FullName = FullName;
-            this.Files = Files;
-        }
-
-        public Directory(DirectoryInfo Info) : this(
-            Info.Name, Info.FullName,
-            Info.GetFiles("*", SearchOption.TopDirectoryOnly).ToList())
-        {
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
+    }
+
+    public class FileTreePlaylist : FileTreeItem
+    {
+        public FileTreePlaylist(string Name) : base(Name)
+        {
+        }
+    }
+
+    public class FileTreeDirectory : FileTreeItem
+    {
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (value != _isExpanded)
+                {
+                    _isExpanded = value;
+                    NotifyPropertyChanged(nameof(IsExpanded));
+                }
+            }
+        }
+
+        public ObservableCollection<FileInfo> Files { get; private set; }
+        public ObservableCollection<FileTreeItem> Children { get; private set; }
+
+        public FileTreeDirectory(string Name) : base(Name)
+        {
+            _isExpanded = false;
+            Files = new ObservableCollection<FileInfo>();
+            Children = new ObservableCollection<FileTreeItem>();
         }
     }
 }

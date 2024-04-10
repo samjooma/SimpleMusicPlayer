@@ -23,14 +23,16 @@ namespace MyMusicPlayer
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ViewModel.DirectoryHierarchy? Directories { get; private set; }
+        public ViewModel.DirectoryTree? Directories { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
+        public List<ViewModel.Playlist> Playlists { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindow()
         {
             Player = new ViewModel.AudioPlayer();
+            Playlists = new List<ViewModel.Playlist>();
             InitializeComponent();
         }
 
@@ -46,7 +48,7 @@ namespace MyMusicPlayer
 
         public void SetRootDirectory(string RootDirectoryPath)
         {
-            Directories = new ViewModel.DirectoryHierarchy();
+            Directories = new ViewModel.DirectoryTree();
             Directories.SetRootDirectory(RootDirectoryPath);
             NotifyPropertyChanged(nameof(Directories));
         }

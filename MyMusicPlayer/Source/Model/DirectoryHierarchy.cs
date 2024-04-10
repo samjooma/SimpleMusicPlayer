@@ -43,11 +43,6 @@ namespace MyMusicPlayer.Model
             return DirectoryTree[Directory];
         }
 
-        public DirectoryInfo[] OpenDirectory(string DirectoryPath)
-        {
-            return OpenDirectory(new DirectoryInfo(DirectoryPath));
-        }
-
         public void CloseDirectory(DirectoryInfo Directory)
         {
             if (Directory == RootDirectory)

@@ -16,7 +16,7 @@ namespace UnitTestProject
         [TestMethod]
         public void CreateViewModel_RootNameIsValid()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
             Assert.AreEqual(RootDirectoryName, FilesViewModel.RootDirectory.Name, false);
         }
@@ -24,7 +24,7 @@ namespace UnitTestProject
         [TestMethod]
         public void CreateViewModel_ChildrenAreNotNull()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
             Assert.IsNotNull(FilesViewModel.RootDirectory.Children);
         }
@@ -32,7 +32,7 @@ namespace UnitTestProject
         [TestMethod]
         public void ShrinkAndExpandRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
             FilesViewModel.RootDirectory.IsExpanded = false;
             FilesViewModel.RootDirectory.IsExpanded = true;
@@ -42,7 +42,7 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAndShrinkRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
             FilesViewModel.RootDirectory.IsExpanded = true;
             FilesViewModel.RootDirectory.IsExpanded = false;
@@ -52,9 +52,9 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAll_ChildrenAreNotNull()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void ExpandAndAssert(MyMusicPlayer.ViewModel.Directory Directory)
+            void ExpandAndAssert(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
             {
                 Directory.IsExpanded = true;
                 Assert.IsNotNull(Directory.Children);
@@ -69,9 +69,9 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAllAndShrinkRoot_RootContainsTwoChildren()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(MyMusicPlayer.ViewModel.Directory Directory)
+            void Expand(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -90,9 +90,9 @@ namespace UnitTestProject
         [TestMethod]
         public void ExpandAllAndShrinkRoot_TotalDirectoryCountIs22()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(MyMusicPlayer.ViewModel.Directory Directory)
+            void Expand(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -111,9 +111,9 @@ namespace UnitTestProject
         [TestMethod]
         public void TrySelectingAllDirectories_OnlyOneIsSelected()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void OpenAndSelect(MyMusicPlayer.ViewModel.Directory Directory)
+            void OpenAndSelect(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
             {
                 Directory.IsExpanded = true;
                 Directory.IsSelected = true;
@@ -131,11 +131,11 @@ namespace UnitTestProject
         [TestMethod]
         public void TrySelectingAllDirectories_SelectedReferenceIsCorrect()
         {
-            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryHierarchy();
+            var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
 
-            MyMusicPlayer.ViewModel.Directory LastSelected;
-            void OpenAndSelect(MyMusicPlayer.ViewModel.Directory Directory)
+            MyMusicPlayer.ViewModel.FileTreeDirectory LastSelected;
+            void OpenAndSelect(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
             {
                 Directory.IsExpanded = true;
                 Directory.IsSelected = true;
@@ -147,7 +147,7 @@ namespace UnitTestProject
             }
             OpenAndSelect(FilesViewModel.RootDirectory);
 
-            Assert.AreSame(LastSelected, FilesViewModel.SelectedDirectory);
+            Assert.AreSame(LastSelected, FilesViewModel.SelectedItem);
         }
     }
 }
