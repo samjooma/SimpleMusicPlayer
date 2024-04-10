@@ -125,7 +125,7 @@ namespace MyMusicPlayer.ViewModel
             // Add child nodes.
             //
 
-            IEnumerable<FileInfo> PlayListFiles = e.OpenedDirectory.GetFiles("*.m3u", SearchOption.TopDirectoryOnly);
+            var PlayListFiles = new ObservableCollection<FileInfo>(DirectoryData.GetPlaylistFiles(e.OpenedDirectory));
             OpenedNode.Children.Clear();
             // Add directories.
             foreach (DirectoryInfo SubDirectory in DirectoryData.GetSubDirectories(e.OpenedDirectory))
@@ -142,12 +142,7 @@ namespace MyMusicPlayer.ViewModel
             // Add files.
             //
 
-            IEnumerable<FileInfo> MusicFiles = e.OpenedDirectory.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
-            OpenedNode.Files.Clear();
-            foreach (var File in MusicFiles)
-            {
-                OpenedNode.Files.Add(File);
-            }
+            OpenedNode.AudioFiles = new ObservableCollection<FileInfo>(DirectoryData.GetAudioFiles(e.OpenedDirectory));
 
             NotifyPropertyChanged(nameof(DirectoryNodesDictionary));
         }
@@ -179,7 +174,7 @@ namespace MyMusicPlayer.ViewModel
         }
 
         public string Name { get; private set; }
-        public ObservableCollection<FileInfo> Files { get; private set; }
+        public ObservableCollection<FileInfo> AudioFiles { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -187,7 +182,7 @@ namespace MyMusicPlayer.ViewModel
         {
             _isSelected = false;
             this.Name = Name;
-            Files = new ObservableCollection<FileInfo>();
+            AudioFiles = new ObservableCollection<FileInfo>();
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)
@@ -219,7 +214,7 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
-        public ObservableCollection<TreeNode> Children { get; private set; }
+        public ObservableCollection<TreeNode> Children { get; set; }
 
         public DirectoryNode(string Name) : base(Name)
         {

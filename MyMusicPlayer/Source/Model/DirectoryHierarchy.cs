@@ -22,6 +22,8 @@ namespace MyMusicPlayer.Model
             }
         }
         private Dictionary<DirectoryInfo, DirectoryInfo[]> DirectoryTree;
+        private Dictionary<DirectoryInfo, FileInfo[]> AudioFiles;
+        private Dictionary<DirectoryInfo, FileInfo[]> PlaylistFiles;
 
         public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
         public event EventHandler<DirectoryClosedEventArgs>? AfterDirectoryClosed;
@@ -29,9 +31,11 @@ namespace MyMusicPlayer.Model
         public DirectoryHierarchy()
         {
             DirectoryTree = new Dictionary<DirectoryInfo, DirectoryInfo[]>(new DirectoryComparer());
+            AudioFiles = new Dictionary<DirectoryInfo, FileInfo[]>(new DirectoryComparer());
+            PlaylistFiles = new Dictionary<DirectoryInfo, FileInfo[]>(new DirectoryComparer());
         }
 
-        public DirectoryInfo[] OpenDirectory(DirectoryInfo Directory)
+        public void OpenDirectory(DirectoryInfo Directory)
         {
             if (_rootDirectory == null)
             {
@@ -39,8 +43,14 @@ namespace MyMusicPlayer.Model
             }
 
             DirectoryTree[Directory] = Directory.GetDirectories("*", SearchOption.TopDirectoryOnly);
+            var AllFiles = Directory.GetFiles("*", SearchOption.TopDirectoryOnly);
+
+            string[] AudioExtensions = [".mp3"];
+            AudioFiles[Directory] = Array.FindAll(AllFiles, x => AudioExtensions.Contains(x.Extension));
+            string[] PlaylistExtensions = [".m3u"];
+            PlaylistFiles[Directory] = Array.FindAll(AllFiles, x => PlaylistExtensions.Contains(x.Extension));
+
             AfterDirectoryOpened?.Invoke(this, new DirectoryOpenedEventArgs(Directory));
-            return DirectoryTree[Directory];
         }
 
         public void CloseDirectory(DirectoryInfo Directory)
@@ -73,6 +83,16 @@ namespace MyMusicPlayer.Model
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
         {
             return DirectoryTree[Directory];
+        }
+
+        public FileInfo[] GetAudioFiles(DirectoryInfo Directory)
+        {
+            return AudioFiles[Directory];
+        }
+
+        public FileInfo[] GetPlaylistFiles(DirectoryInfo Directory)
+        {
+            return PlaylistFiles[Directory];
         }
 
         public DirectoryInfo? GetParent(DirectoryInfo Directory)
