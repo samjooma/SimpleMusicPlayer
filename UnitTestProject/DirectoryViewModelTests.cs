@@ -54,7 +54,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void ExpandAndAssert(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
+            void ExpandAndAssert(MyMusicPlayer.ViewModel.DirectoryNode Directory)
             {
                 Directory.IsExpanded = true;
                 Assert.IsNotNull(Directory.Children);
@@ -71,7 +71,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
+            void Expand(MyMusicPlayer.ViewModel.DirectoryNode Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -92,7 +92,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void Expand(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
+            void Expand(MyMusicPlayer.ViewModel.DirectoryNode Directory)
             {
                 Directory.IsExpanded = true;
                 if (Directory.Children != null)
@@ -113,7 +113,7 @@ namespace UnitTestProject
         {
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
-            void OpenAndSelect(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
+            void OpenAndSelect(MyMusicPlayer.ViewModel.DirectoryNode Directory)
             {
                 Directory.IsExpanded = true;
                 Directory.IsSelected = true;
@@ -134,8 +134,8 @@ namespace UnitTestProject
             var FilesViewModel = new MyMusicPlayer.ViewModel.DirectoryTree();
             FilesViewModel.SetRootDirectory(RootDirectoryName);
 
-            MyMusicPlayer.ViewModel.FileTreeDirectory LastSelected;
-            void OpenAndSelect(MyMusicPlayer.ViewModel.FileTreeDirectory Directory)
+            MyMusicPlayer.ViewModel.DirectoryNode LastSelected;
+            void OpenAndSelect(MyMusicPlayer.ViewModel.DirectoryNode Directory)
             {
                 Directory.IsExpanded = true;
                 Directory.IsSelected = true;
