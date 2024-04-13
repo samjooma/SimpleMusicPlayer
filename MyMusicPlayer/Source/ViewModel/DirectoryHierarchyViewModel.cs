@@ -11,6 +11,7 @@ using static System.Net.WebRequestMethods;
 using MS.WindowsAPICodePack.Internal;
 using System.Diagnostics;
 using System.Windows.Input;
+using MyMusicPlayer.Model;
 
 namespace MyMusicPlayer.ViewModel
 {
@@ -48,8 +49,6 @@ namespace MyMusicPlayer.ViewModel
             DirectoryData = new Model.DirectoryHierarchy();
 
             var RootDirectory = new DirectoryInfo(RootDirectoryPath);
-            GetOrCreateDirectoryNode(RootDirectory);
-
             DirectoryData.AfterDirectoryOpened += DirectoryData_AfterDirectoryOpened;
             DirectoryData.AfterDirectoryClosed += DirectoryData_AfterDirectoryClosed;
             DirectoryData.OpenDirectory(RootDirectory);
@@ -61,94 +60,96 @@ namespace MyMusicPlayer.ViewModel
             return DirectoryNodesDictionary.Values.ToArray();
         }
 
-        private DirectoryNode GetOrCreateDirectoryNode(DirectoryInfo Key)
+        private DirectoryNode CreateDirectoryNodeRecursive(DirectoryInfo Directory)
         {
-            var Value = new DirectoryNode(Key.Name);
-            if (DirectoryNodesDictionary.TryAdd(Key, Value))
+            // Get or create node.
+            DirectoryNode? Node;
+            if (!DirectoryNodesDictionary.TryGetValue(Directory, out Node))
             {
-                Value.PropertyChanged += TreeNode_PropertyChanged;
+                Node = new DirectoryNode(Directory);
+                DirectoryNodesDictionary[Directory] = Node;
+                Node.IsSelectedChanged += TreeNode_IsSelectedChanged;
+                Node.IsExpandedChanged += DirectoryNode_IsExpandedChanged;
             }
-            return DirectoryNodesDictionary[Key];
+
+            Node.Children.Clear();
+            if (DirectoryData.IsDirectoryOpen(Directory))
+            {
+                // Add files.
+                Node.AudioFiles = new ObservableCollection<FileInfo>(DirectoryData.GetAudioFiles(Directory));
+
+                // Add playlists.
+                foreach (FileInfo PlaylistFile in DirectoryData.GetPlaylistFiles(Directory))
+                {
+                    var Child = new PlaylistNode(PlaylistFile.Name);
+                    Child.IsSelectedChanged += TreeNode_IsSelectedChanged;
+                    Child.AudioFiles = new ObservableCollection<FileInfo>(Model.PlaylistParser.ReadPLaylist_M3U(PlaylistFile));
+                    Node.Children.Add(Child);
+                }
+
+                // Add child directories.
+                foreach (DirectoryInfo SubDirectory in DirectoryData.GetSubDirectories(Directory))
+                {
+                    Node.Children.Add(CreateDirectoryNodeRecursive(SubDirectory));
+                }
+            }
+
+            return Node;
         }
 
-        private void TreeNode_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void RemoveDirectoryNodeRecursive(DirectoryInfo Directory)
         {
-            if (sender is not DirectoryNode ChangedNode) return;
-            switch (e.PropertyName)
+            DirectoryNode? Node;
+            if (DirectoryNodesDictionary.TryGetValue(Directory, out Node))
             {
-                case nameof(ChangedNode.IsSelected):
-                    if (ChangedNode.IsSelected)
-                    {
-                        // Deselect currently selected directory.
-                        if (SelectedItem != null)
-                        {
-                            SelectedItem.IsSelected = false;
-                        }
-                        // Set reference to new selected object.
-                        SelectedItem = ChangedNode;
-                    }
-                    else
-                    {
-                        SelectedItem = null;
-                    }
-                    break;
-                case nameof(ChangedNode.IsExpanded):
-                    // Open child diectories.
-                    foreach (var Child in ChangedNode.Children)
-                    {
-                        DirectoryInfo? ChildDirectoryInfo = null;
-                        foreach (var Pair in DirectoryNodesDictionary)
-                        {
-                            if (Pair.Value == Child)
-                            {
-                                ChildDirectoryInfo = Pair.Key;
-                                break;
-                            }
-                        }
+                foreach (var Child in Node.Children.OfType<DirectoryNode>())
+                {
+                    RemoveDirectoryNodeRecursive(Child.Info);
+                }
+                DirectoryNodesDictionary.Remove(Directory);
+            }
+        }
 
-                        if (ChildDirectoryInfo != null)
-                        {
-                            DirectoryData.OpenDirectory(ChildDirectoryInfo);
-                        }
-                    }
-                    break;
-                default:
-                    break;
+        private void TreeNode_IsSelectedChanged(object? Sender, EventArgs e)
+        {
+            if (Sender is not TreeNode ChangedNode) throw new ArgumentException();
+            if (ChangedNode.IsSelected)
+            {
+                // Deselect currently selected directory.
+                if (SelectedItem != null)
+                {
+                    SelectedItem.IsSelected = false;
+                }
+                // Set reference to new selected object.
+                SelectedItem = ChangedNode;
+            }
+            else
+            {
+                SelectedItem = null;
+            }
+        }
+
+        private void DirectoryNode_IsExpandedChanged(object? Sender, EventArgs e)
+        {
+            if (Sender is not DirectoryNode ChangedNode) throw new ArgumentException();
+            if (ChangedNode.IsExpanded)
+            {
+                // Open child directories.
+                foreach (DirectoryNode Child in ChangedNode.Children.OfType<DirectoryNode>())
+                {
+                    DirectoryData.OpenDirectory(Child.Info);
+                }
             }
         }
 
         private void DirectoryData_AfterDirectoryOpened(object? sender, Model.DirectoryOpenedEventArgs e)
         {
-            DirectoryNode OpenedNode = DirectoryNodesDictionary[e.OpenedDirectory];
-
-            //
-            // Add child nodes.
-            //
-
-            var PlayListFiles = new ObservableCollection<FileInfo>(DirectoryData.GetPlaylistFiles(e.OpenedDirectory));
-            OpenedNode.Children.Clear();
-            // Add directories.
-            foreach (DirectoryInfo SubDirectory in DirectoryData.GetSubDirectories(e.OpenedDirectory))
-            {
-                OpenedNode.Children.Add(GetOrCreateDirectoryNode(SubDirectory));
-            }
-            // Add playlists.
-            foreach (FileInfo PlaylistFile in PlayListFiles)
-            {
-                OpenedNode.Children.Add(new PlaylistNode(PlaylistFile.Name));
-            }
-
-            //
-            // Add files.
-            //
-
-            OpenedNode.AudioFiles = new ObservableCollection<FileInfo>(DirectoryData.GetAudioFiles(e.OpenedDirectory));
-
-            NotifyPropertyChanged(nameof(DirectoryNodesDictionary));
+            CreateDirectoryNodeRecursive(e.OpenedDirectory);
         }
 
         private void DirectoryData_AfterDirectoryClosed(object? sender, Model.DirectoryClosedEventArgs e)
         {
+            RemoveDirectoryNodeRecursive(e.ClosedDirectory);
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)
@@ -157,7 +158,7 @@ namespace MyMusicPlayer.ViewModel
         }
     }
 
-    public class TreeNode : INotifyPropertyChanged
+    public class TreeNode
     {
         private bool _isSelected;
         public bool IsSelected
@@ -168,7 +169,7 @@ namespace MyMusicPlayer.ViewModel
                 if (value != _isSelected)
                 {
                     _isSelected = value;
-                    NotifyPropertyChanged(nameof(IsSelected));
+                    IsSelectedChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -176,18 +177,13 @@ namespace MyMusicPlayer.ViewModel
         public string Name { get; private set; }
         public ObservableCollection<FileInfo> AudioFiles { get; set; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler<EventArgs>? IsSelectedChanged;
 
         public TreeNode(string Name)
         {
             _isSelected = false;
             this.Name = Name;
             AudioFiles = new ObservableCollection<FileInfo>();
-        }
-
-        protected virtual void NotifyPropertyChanged(string PropertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
         }
     }
 
@@ -200,6 +196,8 @@ namespace MyMusicPlayer.ViewModel
 
     public class DirectoryNode : TreeNode
     {
+        internal DirectoryInfo Info { get; set; }
+
         private bool _isExpanded;
         public bool IsExpanded
         {
@@ -209,15 +207,18 @@ namespace MyMusicPlayer.ViewModel
                 if (value != _isExpanded)
                 {
                     _isExpanded = value;
-                    NotifyPropertyChanged(nameof(IsExpanded));
+                    IsExpandedChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
 
         public ObservableCollection<TreeNode> Children { get; set; }
 
-        public DirectoryNode(string Name) : base(Name)
+        public event EventHandler<EventArgs>? IsExpandedChanged;
+
+        public DirectoryNode(DirectoryInfo Info) : base(Info.Name)
         {
+            this.Info = Info;
             _isExpanded = false;
             Children = new ObservableCollection<TreeNode>();
         }
