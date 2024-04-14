@@ -25,14 +25,16 @@ namespace MyMusicPlayer
     {
         public ViewModel.DirectoryTree? Directories { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
-        public List<ViewModel.Playlist> Playlists { get; private set; }
+        public ViewModel.FileList SelectedDirectoryFileList { get; private set; }
+        public ViewModel.FileList CurrentlyPlayingFileList { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindow()
         {
             Player = new ViewModel.AudioPlayer();
-            Playlists = new List<ViewModel.Playlist>();
+            SelectedDirectoryFileList = new ViewModel.FileList(true);
+            CurrentlyPlayingFileList = new ViewModel.FileList(false);
             InitializeComponent();
         }
 
@@ -46,16 +48,24 @@ namespace MyMusicPlayer
             }
         }
 
-        public void SetRootDirectory(string RootDirectoryPath)
+        private void SetRootDirectory(string RootDirectoryPath)
         {
-            Directories = new ViewModel.DirectoryTree();
-            Directories.SetRootDirectory(RootDirectoryPath);
+            Directories = new ViewModel.DirectoryTree(RootDirectoryPath);
+            Directories.PropertyChanged += Directories_PropertyChanged;
             NotifyPropertyChanged(nameof(Directories));
         }
 
-        protected virtual void NotifyPropertyChanged(string PropertyName)
+        private void Directories_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+            if (sender == null) throw new ArgumentNullException();
+            if (sender != Directories) throw new ArgumentException();
+            if (e.PropertyName == nameof(Directories.SelectedItem))
+            {
+                if (Directories.SelectedItem != null)
+                {
+                    SelectedDirectoryFileList.SetFiles(Directories.SelectedItem.AudioFiles);
+                }
+            }
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -69,9 +79,15 @@ namespace MyMusicPlayer
             {
                 if (Item.SelectedItem is FileInfo File)
                 {
-                    Player.PlayFile(File);
+                    CurrentlyPlayingFileList.AddFile(File);
+                    Player.PlayFile(CurrentlyPlayingFileList.Files.Last());
                 }
             }
+        }
+
+        protected virtual void NotifyPropertyChanged(string PropertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
         }
     }
 

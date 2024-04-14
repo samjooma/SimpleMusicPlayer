@@ -11,7 +11,6 @@ using static System.Net.WebRequestMethods;
 using MS.WindowsAPICodePack.Internal;
 using System.Diagnostics;
 using System.Windows.Input;
-using MyMusicPlayer.Model;
 
 namespace MyMusicPlayer.ViewModel
 {
@@ -37,21 +36,17 @@ namespace MyMusicPlayer.ViewModel
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public DirectoryTree()
+        public DirectoryTree(string RootDirectoryPath)
         {
             DirectoryNodesDictionary = new Dictionary<DirectoryInfo, DirectoryNode>(new Model.DirectoryComparer());
             DirectoryData = new Model.DirectoryHierarchy();
-        }
 
-        public void SetRootDirectory(string RootDirectoryPath)
-        {
             DirectoryNodesDictionary.Clear();
             DirectoryData = new Model.DirectoryHierarchy();
 
-            var RootDirectory = new DirectoryInfo(RootDirectoryPath);
             DirectoryData.AfterDirectoryOpened += DirectoryData_AfterDirectoryOpened;
             DirectoryData.AfterDirectoryClosed += DirectoryData_AfterDirectoryClosed;
-            DirectoryData.OpenDirectory(RootDirectory);
+            DirectoryData.OpenDirectory(new DirectoryInfo(RootDirectoryPath));
         }
 
         //TODO: This function is bad.

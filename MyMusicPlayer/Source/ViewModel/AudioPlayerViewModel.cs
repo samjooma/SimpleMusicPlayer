@@ -16,22 +16,6 @@ namespace MyMusicPlayer.ViewModel
     {
         private MediaPlayer Player;
 
-        public ObservableCollection<FileInfo> PlayList { get; private set; }
-
-        private int? _activePlayListIndex;
-        public int? ActivePlayListIndex
-        {
-            get => _activePlayListIndex;
-            private set
-            {
-                if (value != _activePlayListIndex)
-                {
-                    _activePlayListIndex = value;
-                    NotifyPropertyChanged(nameof(ActivePlayListIndex));
-                }
-            }
-        }
-
         private bool _isPaused;
         public bool IsPaused
         {
@@ -59,24 +43,12 @@ namespace MyMusicPlayer.ViewModel
         public AudioPlayer()
         {
             Player = new MediaPlayer();
-            Player.MediaEnded += Player_MediaEnded;
-            PlayList = new ObservableCollection<FileInfo>();
             _isPaused = true;
-        }
-
-        private void Player_MediaEnded(object? sender, EventArgs e)
-        {
-            if (ActivePlayListIndex != null)
-            {
-                ActivePlayListIndex = PlayList.Count > 0 ? (ActivePlayListIndex + 1) % PlayList.Count : null;
-            }
         }
 
         public void PlayFile(FileInfo File)
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
-            PlayList.Add(File);
-            ActivePlayListIndex = PlayList.Count - 1;
             Player.Play();
             IsPaused = false;
         }

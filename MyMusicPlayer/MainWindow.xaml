@@ -46,7 +46,7 @@
             </DockPanel>
             <StackPanel Grid.Column="1">
                 <Label Name="SelectedFileLabel" Content="{Binding Directories.SelectedItem}" VerticalAlignment="Top" Height="26"/>
-                <ListView ItemsSource="{Binding Directories.SelectedItem.AudioFiles}" PreviewMouseDoubleClick="ListView_PreviewMouseDoubleClick">
+                <ListView ItemsSource="{Binding SelectedDirectoryFileList.Files}" PreviewMouseDoubleClick="ListView_PreviewMouseDoubleClick">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
@@ -56,7 +56,7 @@
                 </ListView>
             </StackPanel>
             <StackPanel Grid.Column="2">
-                <ListView ItemsSource="{Binding Player.PlayList}">
+                <ListView ItemsSource="{Binding CurrentlyPlayingFileList.Files}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
