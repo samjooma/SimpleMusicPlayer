@@ -56,13 +56,33 @@
                 </ListView>
             </StackPanel>
             <StackPanel Grid.Column="2">
-                <ListView ItemsSource="{Binding CurrentlyPlayingFileList.Files}" SelectedIndex="{Binding CurrentlyPlayingFileList.ActiveIndex, Mode=TwoWay}" MouseDoubleClick="CurrentlyPlayingView_MouseDoubleClick">
+                <ListView
+                    Name="CurrentlyPlaying"
+                    ItemsSource="{Binding CurrentlyPlayingFileList.Files}"
+                    SelectionMode="Extended"
+                    MouseDoubleClick="CurrentlyPlayingView_MouseDoubleClick"
+                >
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
                             <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
                         </GridView>
                     </ListView.View>
+                    <ListView.Resources>
+                        <ContextMenu x:Key="ItemContextMenu">
+                            <MenuItem Command="MediaCommands.Play"/>
+                            <MenuItem Command="ApplicationCommands.Delete"/>
+                        </ContextMenu>
+                    </ListView.Resources>
+                    <ListView.CommandBindings>
+                        <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
+                        <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
+                    </ListView.CommandBindings>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}" >
+                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                 </ListView>
             </StackPanel>
         </Grid>

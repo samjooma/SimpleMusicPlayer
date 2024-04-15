@@ -15,6 +15,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 using System.IO;
+using System.Windows.Controls.Primitives;
+using System.Collections.Specialized;
+using System.Data;
 
 namespace MyMusicPlayer
 {
@@ -26,7 +29,7 @@ namespace MyMusicPlayer
         public ViewModel.DirectoryTree? Directories { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
         public ViewModel.FileSelectionList DirectoryFileList { get; private set; }
-        public ViewModel.FileActivationList CurrentlyPlayingFileList { get; private set; }
+        public ViewModel.FileSelectionList CurrentlyPlayingFileList { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -35,7 +38,7 @@ namespace MyMusicPlayer
             Player = new ViewModel.AudioPlayer();
             Player.PropertyChanged += Player_PropertyChanged;
             DirectoryFileList = new ViewModel.FileSelectionList(true);
-            CurrentlyPlayingFileList = new ViewModel.FileActivationList(false);
+            CurrentlyPlayingFileList = new ViewModel.FileSelectionList(false);
             InitializeComponent();
         }
 
@@ -98,14 +101,36 @@ namespace MyMusicPlayer
 
         private void CurrentlyPlayingView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (CurrentlyPlayingFileList.ActiveFile != null)
+            FileInfo? SelectedFile = CurrentlyPlaying.SelectedItem as FileInfo;
+            if (SelectedFile != null)
             {
-                Player.PlayFile(CurrentlyPlayingFileList.ActiveFile);
+                Player.PlayFile(SelectedFile);
             }
-            else
+        }
+
+        private void CommandPlay_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            FileInfo? SelectedFile = CurrentlyPlaying.SelectedItem as FileInfo;
+            if (SelectedFile != null)
             {
-                Player.Stop();
+                Player.PlayFile(SelectedFile);
             }
+        }
+
+        private void CommandPlay_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            FileInfo? SelectedFile = CurrentlyPlaying.SelectedItem as FileInfo;
+            e.CanExecute = SelectedFile != null;
+        }
+
+        private void CommandDelete_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            CurrentlyPlayingFileList.RemoveFiles(CurrentlyPlaying.SelectedItems.OfType<FileInfo>());
+        }
+
+        private void CommandDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
     }
 
