@@ -25,16 +25,17 @@ namespace MyMusicPlayer
     {
         public ViewModel.DirectoryTree? Directories { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
-        public ViewModel.FileList SelectedDirectoryFileList { get; private set; }
-        public ViewModel.FileList CurrentlyPlayingFileList { get; private set; }
+        public ViewModel.FileSelectionList DirectoryFileList { get; private set; }
+        public ViewModel.FileActivationList CurrentlyPlayingFileList { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindow()
         {
             Player = new ViewModel.AudioPlayer();
-            SelectedDirectoryFileList = new ViewModel.FileList(true);
-            CurrentlyPlayingFileList = new ViewModel.FileList(false);
+            Player.PropertyChanged += Player_PropertyChanged;
+            DirectoryFileList = new ViewModel.FileSelectionList(true);
+            CurrentlyPlayingFileList = new ViewModel.FileActivationList(false);
             InitializeComponent();
         }
 
@@ -63,9 +64,20 @@ namespace MyMusicPlayer
             {
                 if (Directories.SelectedItem != null)
                 {
-                    SelectedDirectoryFileList.SetFiles(Directories.SelectedItem.AudioFiles);
+                    DirectoryFileList.SetFiles(Directories.SelectedItem.AudioFiles);
                 }
             }
+        }
+
+        private void Player_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender == null) throw new ArgumentNullException();
+            if (sender != Player) throw new ArgumentException();
+        }
+
+        protected virtual void NotifyPropertyChanged(string PropertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -73,21 +85,27 @@ namespace MyMusicPlayer
             Player.IsPaused = !Player.IsPaused;
         }
 
-        private void ListView_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DirectoryView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is ListView Item)
             {
                 if (Item.SelectedItem is FileInfo File)
                 {
                     CurrentlyPlayingFileList.AddFile(File);
-                    Player.PlayFile(CurrentlyPlayingFileList.Files.Last());
                 }
             }
         }
 
-        protected virtual void NotifyPropertyChanged(string PropertyName)
+        private void CurrentlyPlayingView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+            if (CurrentlyPlayingFileList.ActiveFile != null)
+            {
+                Player.PlayFile(CurrentlyPlayingFileList.ActiveFile);
+            }
+            else
+            {
+                Player.Stop();
+            }
         }
     }
 

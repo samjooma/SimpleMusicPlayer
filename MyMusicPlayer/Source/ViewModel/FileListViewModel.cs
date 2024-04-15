@@ -9,21 +9,19 @@ using System.Threading.Tasks;
 
 namespace MyMusicPlayer.ViewModel
 {
-    public class FileList : INotifyPropertyChanged
+    public class FileSelectionList : INotifyPropertyChanged
     {
-        private ObservableCollection<FileInfo> _files;
-        private HashSet<int> _selectedIndices;
-        private int? _activeIndex;
+        protected ObservableCollection<FileInfo> _files;
+        protected HashSet<int> _selectedIndices;
 
         public IEnumerable<FileInfo> Files { get { foreach (var File in _files) yield return File; } }
         public IEnumerable<FileInfo> SelectedFiles { get { foreach (int Index in _selectedIndices) yield return _files[Index]; } }
-        public FileInfo? ActiveFile { get => _activeIndex != null ? _files[_activeIndex.Value] : null; }
 
         public bool AllowMultipleSelection { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public FileList(bool AllowMultipleSelection)
+        public FileSelectionList(bool AllowMultipleSelection)
         {
             _files = new ObservableCollection<FileInfo>();
             _files.CollectionChanged += Files_CollectionChanged;
@@ -31,31 +29,25 @@ namespace MyMusicPlayer.ViewModel
             this.AllowMultipleSelection = AllowMultipleSelection;
         }
 
-        private void Files_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        protected virtual void Files_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             _selectedIndices.Clear();
-            _activeIndex = null;
             NotifyPropertyChanged(nameof(Files));
             NotifyPropertyChanged(nameof(SelectedFiles));
-            NotifyPropertyChanged(nameof(ActiveFile));
         }
 
-        public void SetSelection(int Index)
+        protected virtual void SetSelection(int Index)
         {
             _selectedIndices = [Index];
-            _activeIndex = Index;
             NotifyPropertyChanged(nameof(SelectedFiles));
-            NotifyPropertyChanged(nameof(ActiveFile));
         }
 
-        public void ExpandSelection(int Index)
+        protected virtual void ExpandSelection(int Index)
         {
             if (AllowMultipleSelection)
             {
                 _selectedIndices.Add(Index);
-                _activeIndex = Index;
                 NotifyPropertyChanged(nameof(SelectedFiles));
-                NotifyPropertyChanged(nameof(ActiveFile));
             }
             else
             {
@@ -90,6 +82,49 @@ namespace MyMusicPlayer.ViewModel
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
+    }
+
+    public class FileActivationList : FileSelectionList
+    {
+        private int _activeIndex;
+        public int ActiveIndex
+        {
+            get => _activeIndex;
+            set
+            {
+                if (value != _activeIndex)
+                {
+                    _activeIndex = value;
+                    NotifyPropertyChanged(nameof(ActiveIndex));
+                    NotifyPropertyChanged(nameof(ActiveFile));
+                }
+            }
+        }
+
+        public FileInfo? ActiveFile { get => ActiveIndex > -1 ? _files[ActiveIndex] : null; }
+
+        public FileActivationList(bool AllowMultipleSelection) : base(AllowMultipleSelection)
+        {
+            ActiveIndex = -1;
+        }
+
+        protected override void Files_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            base.Files_CollectionChanged(sender, e);
+            ActiveIndex = -1;
+        }
+
+        protected override void SetSelection(int Index)
+        {
+            base.SetSelection(Index);
+            ActiveIndex = Index;
+        }
+
+        protected override void ExpandSelection(int Index)
+        {
+            base.SetSelection(Index);
+            ActiveIndex = Index;
         }
     }
 }

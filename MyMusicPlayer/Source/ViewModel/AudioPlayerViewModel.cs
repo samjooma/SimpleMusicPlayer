@@ -53,6 +53,11 @@ namespace MyMusicPlayer.ViewModel
             IsPaused = false;
         }
 
+        public void Stop()
+        {
+            Player.Stop();
+        }
+
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
