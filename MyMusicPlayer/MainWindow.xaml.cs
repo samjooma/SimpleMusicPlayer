@@ -28,8 +28,8 @@ namespace MyMusicPlayer
     {
         public ViewModel.DirectoryTree? Directories { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
-        public ViewModel.FileSelectionList DirectoryFileList { get; private set; }
-        public ViewModel.FileSelectionList CurrentlyPlayingFileList { get; private set; }
+        public ObservableCollection<FileInfo> DirectoryFileList { get; private set; }
+        public ObservableCollection<FileInfo> CurrentlyPlayingFileList { get; private set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -37,8 +37,8 @@ namespace MyMusicPlayer
         {
             Player = new ViewModel.AudioPlayer();
             Player.PropertyChanged += Player_PropertyChanged;
-            DirectoryFileList = new ViewModel.FileSelectionList(true);
-            CurrentlyPlayingFileList = new ViewModel.FileSelectionList(false);
+            DirectoryFileList = new ObservableCollection<FileInfo>();
+            CurrentlyPlayingFileList = new ObservableCollection<FileInfo>();
             InitializeComponent();
         }
 
@@ -67,7 +67,11 @@ namespace MyMusicPlayer
             {
                 if (Directories.SelectedItem != null)
                 {
-                    DirectoryFileList.SetFiles(Directories.SelectedItem.AudioFiles);
+                    DirectoryFileList.Clear();
+                    foreach (var File in Directories.SelectedItem.AudioFiles)
+                    {
+                        DirectoryFileList.Add(File);
+                    }
                 }
             }
         }
@@ -94,7 +98,7 @@ namespace MyMusicPlayer
             {
                 if (Item.SelectedItem is FileInfo File)
                 {
-                    CurrentlyPlayingFileList.AddFile(File);
+                    CurrentlyPlayingFileList.Add(File);
                 }
             }
         }
@@ -125,7 +129,10 @@ namespace MyMusicPlayer
 
         private void CommandDelete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentlyPlayingFileList.RemoveFiles(CurrentlyPlaying.SelectedItems.OfType<FileInfo>());
+            foreach (var File in CurrentlyPlaying.SelectedItems.OfType<FileInfo>())
+            {
+                CurrentlyPlayingFileList.Remove(File);
+            }
         }
 
         private void CommandDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
