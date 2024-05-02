@@ -16,6 +16,23 @@ namespace MyMusicPlayer.ViewModel
     {
         private MediaPlayer Player;
 
+        private FileInfo? _playingFile;
+        public FileInfo? PlayingFile
+        {
+            private set
+            {
+                if (value != _playingFile)
+                {
+                    _playingFile = value;
+                    NotifyPropertyChanged(nameof(PlayingFile));
+                }
+            }
+            get
+            {
+                return _playingFile;
+            }
+        }
+
         private bool _isPaused;
         public bool IsPaused
         {
@@ -51,11 +68,14 @@ namespace MyMusicPlayer.ViewModel
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
             Player.Play();
             IsPaused = false;
+            PlayingFile = File;
         }
 
         public void Stop()
         {
             Player.Stop();
+            IsPaused = true;
+            PlayingFile = null;
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)

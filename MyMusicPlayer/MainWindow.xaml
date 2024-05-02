@@ -93,7 +93,7 @@
                 <Button Name="PauseButton" Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
                 <Button Content="Next"/>
             </StackPanel>
-            <Label Name="PlayingSongLabel">
+            <Label Name="PlayingSongLabel" Content="{Binding Player.PlayingFile.Name, Converter={StaticResource FileNameWithoutExtension}}">
             </Label>
         </StackPanel>
     </Grid>
