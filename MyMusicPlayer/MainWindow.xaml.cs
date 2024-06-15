@@ -129,9 +129,10 @@ namespace MyMusicPlayer
 
         private void CommandDelete_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            foreach (var File in CurrentlyPlaying.SelectedItems.OfType<FileInfo>())
+            FileInfo? SelectedFile = CurrentlyPlaying.SelectedItem as FileInfo;
+            if (SelectedFile != null)
             {
-                CurrentlyPlayingFileList.Remove(File);
+                CurrentlyPlayingFileList.Remove(SelectedFile);
             }
         }
 
