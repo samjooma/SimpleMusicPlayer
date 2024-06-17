@@ -16,6 +16,8 @@ namespace MyMusicPlayer.ViewModel
 {
     public class DirectoryTree : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         private Model.DirectoryHierarchy DirectoryData { get; set; }
         private Dictionary<DirectoryInfo, DirectoryNode> DirectoryNodesDictionary { get; set; }
         private TreeNode? _selectedItem;
@@ -33,8 +35,6 @@ namespace MyMusicPlayer.ViewModel
         }
 
         public DirectoryNode RootDirectory { get => DirectoryNodesDictionary[DirectoryData.RootDirectory]; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public DirectoryTree(string RootDirectoryPath)
         {
@@ -137,12 +137,12 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
-        private void DirectoryData_AfterDirectoryOpened(object? sender, Model.DirectoryOpenedEventArgs e)
+        private void DirectoryData_AfterDirectoryOpened(object? Sender, Model.DirectoryOpenedEventArgs e)
         {
             CreateDirectoryNodeRecursive(e.OpenedDirectory);
         }
 
-        private void DirectoryData_AfterDirectoryClosed(object? sender, Model.DirectoryClosedEventArgs e)
+        private void DirectoryData_AfterDirectoryClosed(object? Sender, Model.DirectoryClosedEventArgs e)
         {
             RemoveDirectoryNodeRecursive(e.ClosedDirectory);
         }

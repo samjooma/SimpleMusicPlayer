@@ -46,10 +46,10 @@
             </DockPanel>
             <StackPanel Grid.Column="1">
                 <Label Name="SelectedFileLabel" Content="{Binding Directories.SelectedItem}" VerticalAlignment="Top" Height="26"/>
-                <ListView ItemsSource="{Binding DirectoryFileList}" MouseDoubleClick="DirectoryView_MouseDoubleClick">
+                <ListView ItemsSource="{Binding DirectoryFiles}" MouseDoubleClick="DirectoryView_MouseDoubleClick">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
                             <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
                         </GridView>
                     </ListView.View>
@@ -57,14 +57,14 @@
             </StackPanel>
             <StackPanel Grid.Column="2">
                 <ListView
-                    Name="CurrentlyPlaying"
-                    ItemsSource="{Binding CurrentlyPlayingFileList}"
+                    Name="SongQueueView"
+                    ItemsSource="{Binding SongQueue.FileList}"
                     SelectionMode="Extended"
-                    MouseDoubleClick="CurrentlyPlayingView_MouseDoubleClick"
+                    MouseDoubleClick="SongQueueView_MouseDoubleClick"
                 >
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
                             <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
                         </GridView>
                     </ListView.View>
@@ -81,6 +81,11 @@
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" >
                             <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSongActive}" Value="True">
+                                    <Setter Property="Background" Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>
@@ -89,7 +94,11 @@
         <StackPanel Grid.Row="1">
             <Separator/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Previous"/>
+                <Button Content="Previous">
+                    <Button.CommandBindings>
+                        <CommandBinding Command="MediaCommands.PreviousTrack" Executed="CommandPreviousTrack_Executed"  CanExecute="CommandPreviousTrack_CanExecute"/>
+                    </Button.CommandBindings>
+                </Button>
                 <Button Name="PauseButton" Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
                 <Button Content="Next"/>
             </StackPanel>
