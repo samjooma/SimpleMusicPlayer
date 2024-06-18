@@ -99,10 +99,11 @@
                         <CommandBinding Command="MediaCommands.PreviousTrack" Executed="CommandPreviousTrack_Executed"  CanExecute="CommandPreviousTrack_CanExecute"/>
                     </Button.CommandBindings>
                 </Button>
-                <Button Name="PauseButton" Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
+                <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
                 <Button Content="Next"/>
+                <Button Content="Stop" Click="StopButton_Click"/>
             </StackPanel>
-            <Label Name="PlayingSongLabel" Content="{Binding Player.PlayingFile.Name, Converter={StaticResource FileNameWithoutExtension}}">
+            <Label Name="PlayingSongLabel" Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}">
             </Label>
         </StackPanel>
     </Grid>

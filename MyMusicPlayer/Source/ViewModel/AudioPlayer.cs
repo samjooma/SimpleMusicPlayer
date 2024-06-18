@@ -16,20 +16,17 @@ namespace MyMusicPlayer.ViewModel
     {
         private MediaPlayer Player;
 
-        private FileInfo? _playingFile;
-        public FileInfo? PlayingFile
+        FileInfo? _openedAudioFile;
+        public FileInfo? OpenedAudioFile
         {
-            private set
+            get => _openedAudioFile;
+            set
             {
-                if (value != _playingFile)
+                if (value != _openedAudioFile)
                 {
-                    _playingFile = value;
-                    NotifyPropertyChanged(nameof(PlayingFile));
+                    _openedAudioFile = value;
+                    NotifyPropertyChanged(nameof(OpenedAudioFile));
                 }
-            }
-            get
-            {
-                return _playingFile;
             }
         }
 
@@ -37,19 +34,11 @@ namespace MyMusicPlayer.ViewModel
         public bool IsPaused
         {
             get => _isPaused;
-            set
+            private set
             {
                 if (value != _isPaused)
                 {
                     _isPaused = value;
-                    if (_isPaused)
-                    {
-                        Player.Pause();
-                    }
-                    else
-                    {
-                        Player.Play();
-                    }
                     NotifyPropertyChanged(nameof(IsPaused));
                 }
             }
@@ -63,19 +52,46 @@ namespace MyMusicPlayer.ViewModel
             _isPaused = true;
         }
 
-        public void PlayFile(FileInfo File)
+        public void OpenFile(FileInfo File)
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
+            OpenedAudioFile = File;
+        }
+
+        public void CloseFile()
+        {
+            Player.Close();
+            OpenedAudioFile = null;
+        }
+
+        public void Play()
+        {
             Player.Play();
             IsPaused = false;
-            PlayingFile = File;
+        }
+
+        public void Pause()
+        {
+            Player.Pause();
+            IsPaused = true;
+        }
+
+        public void TogglePause()
+        {
+            if (IsPaused)
+            {
+                Play();
+            }
+            else
+            {
+                Pause();
+            }
         }
 
         public void Stop()
         {
             Player.Stop();
             IsPaused = true;
-            PlayingFile = null;
         }
 
         protected virtual void NotifyPropertyChanged(string PropertyName)

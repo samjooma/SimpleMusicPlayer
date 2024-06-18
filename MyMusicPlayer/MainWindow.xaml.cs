@@ -53,7 +53,8 @@ namespace MyMusicPlayer
         private void PlaySongInQueueAtIndex(int Index)
         {
             var SongItems = SongQueueView.Items.OfType<ViewModel.SongQueueItem>();
-            Player.PlayFile(SongItems.ElementAt(Index).FileInfo);
+            Player.OpenFile(SongItems.ElementAt(Index).FileInfo);
+            Player.Play();
             SongQueue.ActiveSongIndex = Index;
         }
 
@@ -73,7 +74,12 @@ namespace MyMusicPlayer
 
         private void PauseButton_Click(object Sender, RoutedEventArgs e)
         {
-            Player.IsPaused = !Player.IsPaused;
+            Player.TogglePause();
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            Player.Stop();
         }
 
         private void DirectoryView_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
@@ -128,6 +134,13 @@ namespace MyMusicPlayer
 
         private void SongQueue_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(SongQueue.ActiveSong))
+            {
+                if (SongQueue.ActiveSong == null)
+                {
+                    Player.CloseFile();
+                }
+            }
         }
 
         //
