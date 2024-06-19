@@ -105,8 +105,8 @@
                 <Button Content="Next" Command="MediaCommands.NextTrack"/>
                 <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
             </StackPanel>
-            <Label Name="PlayingSongLabel" Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}">
-            </Label>
+            <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+            <Label Content="{Binding Player.CurrentTime}"/>
         </StackPanel>
     </Grid>
 </Window>

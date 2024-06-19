@@ -44,12 +44,23 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
+        private TimeSpan _currentTime;
+        public TimeSpan CurrentTime { get => _currentTime; }
+        public Duration Duration { get => Player.NaturalDuration; }
+
+        private System.Windows.Threading.DispatcherTimer Timer;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public AudioPlayer()
         {
+            Timer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Render);
+            Timer.Interval = TimeSpan.FromMilliseconds(1);
+            Timer.Tick += UpdateCurrentTime;
+            Timer.Start();
             Player = new MediaPlayer();
             _isPaused = true;
+            _currentTime = TimeSpan.Zero;
         }
 
         public void OpenFile(FileInfo File)
@@ -102,6 +113,16 @@ namespace MyMusicPlayer.ViewModel
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
+
+        private void UpdateCurrentTime(object? Sender, EventArgs e)
+        {
+            int FlooredSeconds = (int)Math.Floor(Player.Position.TotalSeconds);
+            if (FlooredSeconds != (int)_currentTime.TotalSeconds)
+            {
+                _currentTime = TimeSpan.FromSeconds(FlooredSeconds);
+                NotifyPropertyChanged(nameof(CurrentTime));
+            }
         }
     }
 }
