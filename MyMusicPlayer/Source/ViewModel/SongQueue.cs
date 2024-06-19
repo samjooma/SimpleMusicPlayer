@@ -90,7 +90,7 @@ namespace MyMusicPlayer.ViewModel
             }
             else
             {
-                ActiveSongIndex = 0;
+                ActiveSongIndex = null;
             }
         }
 
@@ -102,7 +102,7 @@ namespace MyMusicPlayer.ViewModel
             }
             else
             {
-                ActiveSongIndex = 0;
+                ActiveSongIndex = null;
             }
         }
 

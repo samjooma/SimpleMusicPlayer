@@ -56,18 +56,23 @@ namespace MyMusicPlayer.ViewModel
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
             OpenedAudioFile = File;
+            IsPaused = true;
         }
 
         public void CloseFile()
         {
             Player.Close();
             OpenedAudioFile = null;
+            IsPaused = true;
         }
 
         public void Play()
         {
-            Player.Play();
-            IsPaused = false;
+            if (Player.HasAudio)
+            {
+                Player.Play();
+                IsPaused = false;
+            }
         }
 
         public void Pause()

@@ -12,6 +12,13 @@
         <local:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
         <local:BooleanConverter x:Key="BooleanToPauseResume" FalseValue="Pause" TrueValue="Resume"/>
     </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
+        <CommandBinding Command="MediaCommands.Pause" Executed="CommandPause_Executed" CanExecute="CommandPause_CanExecute"/>
+        <CommandBinding Command="MediaCommands.Stop" Executed="CommandStop_Executed" CanExecute="CommandStop_CanExecute"/>
+        <CommandBinding Command="MediaCommands.PreviousTrack" Executed="CommandPreviousTrack_Executed" CanExecute="CommandPreviousTrack_CanExecute"/>
+        <CommandBinding Command="MediaCommands.NextTrack" Executed="CommandNextTrack_Executed" CanExecute="CommandNextTrack_CanExecute"/>
+    </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -75,7 +82,6 @@
                         </ContextMenu>
                     </ListView.Resources>
                     <ListView.CommandBindings>
-                        <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
                         <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
                     </ListView.CommandBindings>
                     <ListView.ItemContainerStyle>
@@ -94,14 +100,10 @@
         <StackPanel Grid.Row="1">
             <Separator/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Previous">
-                    <Button.CommandBindings>
-                        <CommandBinding Command="MediaCommands.PreviousTrack" Executed="CommandPreviousTrack_Executed"  CanExecute="CommandPreviousTrack_CanExecute"/>
-                    </Button.CommandBindings>
-                </Button>
-                <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Click="PauseButton_Click" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
-                <Button Content="Next"/>
-                <Button Content="Stop" Click="StopButton_Click"/>
+                <Button Content="Previous" Command="MediaCommands.PreviousTrack"/>
+                <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Command="MediaCommands.Pause" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
+                <Button Content="Next" Command="MediaCommands.NextTrack"/>
+                <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
             </StackPanel>
             <Label Name="PlayingSongLabel" Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}">
             </Label>

@@ -72,16 +72,6 @@ namespace MyMusicPlayer
             }
         }
 
-        private void PauseButton_Click(object Sender, RoutedEventArgs e)
-        {
-            Player.TogglePause();
-        }
-
-        private void StopButton_Click(object sender, RoutedEventArgs e)
-        {
-            Player.Stop();
-        }
-
         private void DirectoryView_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
         {
             if (Sender is ListView View)
@@ -140,26 +130,17 @@ namespace MyMusicPlayer
                 {
                     Player.CloseFile();
                 }
+                else
+                {
+                    Player.OpenFile(SongQueue.ActiveSong.FileInfo);
+                    Player.Play();
+                }
             }
         }
 
         //
         // Commands.
         //
-
-        private void CommandPlay_Executed(object Sender, ExecutedRoutedEventArgs e)
-        {
-            if (SongQueueView.SelectedIndex > -1)
-            {
-                PlaySongInQueueAtIndex(SongQueueView.SelectedIndex);
-            }
-        }
-
-        private void CommandPlay_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
-        {
-            int Index = SongQueueView.SelectedIndex;
-            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
-        }
 
         private void CommandDelete_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
@@ -175,14 +156,58 @@ namespace MyMusicPlayer
             e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
         }
 
+        private void CommandPlay_Executed(object Sender, ExecutedRoutedEventArgs e)
+        {
+            if (SongQueueView.SelectedIndex > -1)
+            {
+                PlaySongInQueueAtIndex(SongQueueView.SelectedIndex);
+            }
+        }
+
+        private void CommandPlay_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            int Index = SongQueueView.SelectedIndex;
+            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
+        }
+
+        private void CommandPause_Executed(object Sender, ExecutedRoutedEventArgs e)
+        {
+            Player.TogglePause();
+        }
+
+        private void CommandPause_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = SongQueue.FileList.Count > 0;
+        }
+
+        private void CommandStop_Executed(object Sender, ExecutedRoutedEventArgs e)
+        {
+            Player.Stop();
+        }
+
+        private void CommandStop_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = SongQueue.FileList.Count > 0;
+        }
+
         private void CommandPreviousTrack_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            
+            SongQueue.PreviousSong();
         }
 
         private void CommandPreviousTrack_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
+            e.CanExecute = SongQueue.FileList.Count > 0;
+        }
 
+        private void CommandNextTrack_Executed(object Sender, ExecutedRoutedEventArgs e)
+        {
+            SongQueue.NextSong();
+        }
+
+        private void CommandNextTrack_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = SongQueue.FileList.Count > 0;
         }
     }
 
