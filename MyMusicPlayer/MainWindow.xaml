@@ -68,7 +68,6 @@
                     Name="SongQueueView"
                     ItemsSource="{Binding SongQueue.FileList}"
                     SelectionMode="Extended"
-                    MouseDoubleClick="SongQueueView_MouseDoubleClick"
                 >
                     <ListView.View>
                         <GridView>
@@ -76,15 +75,19 @@
                             <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
                         </GridView>
                     </ListView.View>
+                    <ListView.CommandBindings>
+                        <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
+                    </ListView.CommandBindings>
+                    <ListView.InputBindings>
+                        <MouseBinding Gesture="LeftDoubleClick" Command="MediaCommands.Play"/>
+                        <KeyBinding Key="Enter" Command="MediaCommands.Play"/>
+                    </ListView.InputBindings>
                     <ListView.Resources>
                         <ContextMenu x:Key="ItemContextMenu">
                             <MenuItem Command="MediaCommands.Play"/>
                             <MenuItem Command="ApplicationCommands.Delete"/>
                         </ContextMenu>
                     </ListView.Resources>
-                    <ListView.CommandBindings>
-                        <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
-                    </ListView.CommandBindings>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" >
                             <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />

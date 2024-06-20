@@ -92,14 +92,14 @@ namespace MyMusicPlayer.ViewModel
         public void OpenFile(FileInfo File)
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
-            OpenedAudioFile = File;
         }
 
         private void Player_MediaOpened(object? Sender, EventArgs e)
         {
-            IsPaused = true;
+            OpenedAudioFile = new FileInfo(Player.Source.AbsolutePath);
             Duration = Player.NaturalDuration.TimeSpan;
             _previousTime = TimeSpan.Zero;
+            Play();
         }
 
         public void CloseFile()

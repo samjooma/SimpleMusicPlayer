@@ -36,7 +36,6 @@ namespace MyMusicPlayer
         public MainWindow()
         {
             Player = new ViewModel.AudioPlayer();
-            Player.PropertyChanged += Player_PropertyChanged;
             SongQueue = new ViewModel.SongQueue();
             SongQueue.PropertyChanged += SongQueue_PropertyChanged;
             DirectoryFiles = new ObservableCollection<ViewModel.FileItem>();
@@ -48,14 +47,6 @@ namespace MyMusicPlayer
             Directories = new ViewModel.DirectoryTree(RootDirectoryPath);
             Directories.PropertyChanged += Directories_PropertyChanged;
             NotifyPropertyChanged(nameof(Directories));
-        }
-
-        private void PlaySongInQueueAtIndex(int Index)
-        {
-            var SongItems = SongQueueView.Items.OfType<ViewModel.SongQueueItem>();
-            Player.OpenFile(SongItems.ElementAt(Index).FileInfo);
-            Player.Play();
-            SongQueue.ActiveSongIndex = Index;
         }
 
         //
@@ -80,14 +71,6 @@ namespace MyMusicPlayer
                 {
                     SongQueue.AddSong(new ViewModel.SongQueueItem(Item.FileInfo, false));
                 }
-            }
-        }
-
-        private void SongQueueView_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
-        {
-            if (SongQueueView.SelectedIndex > -1)
-            {
-                PlaySongInQueueAtIndex(SongQueueView.SelectedIndex);
             }
         }
 
@@ -118,10 +101,6 @@ namespace MyMusicPlayer
             }
         }
 
-        private void Player_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
-        {
-        }
-
         private void SongQueue_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(SongQueue.ActiveSong))
@@ -133,7 +112,6 @@ namespace MyMusicPlayer
                 else
                 {
                     Player.OpenFile(SongQueue.ActiveSong.FileInfo);
-                    Player.Play();
                 }
             }
         }
@@ -158,10 +136,7 @@ namespace MyMusicPlayer
 
         private void CommandPlay_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            if (SongQueueView.SelectedIndex > -1)
-            {
-                PlaySongInQueueAtIndex(SongQueueView.SelectedIndex);
-            }
+            SongQueue.ActiveSongIndex = SongQueueView.SelectedIndex;
         }
 
         private void CommandPlay_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
