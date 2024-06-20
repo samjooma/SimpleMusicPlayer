@@ -11,6 +11,7 @@
         <local:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
         <local:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
         <local:BooleanConverter x:Key="BooleanToPauseResume" FalseValue="Pause" TrueValue="Resume"/>
+        <local:TimeSpanToSeconds x:Key="TimeSpanToSeconds"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
@@ -105,8 +106,23 @@
                 <Button Content="Next" Command="MediaCommands.NextTrack"/>
                 <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
             </StackPanel>
-            <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
-            <Label Content="{Binding Player.CurrentTime}"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="{Binding Player.CurrentTime}"/>
+                    <Label Content="/"/>
+                    <Label Content="{Binding Player.Duration}"/>
+                </StackPanel>
+            </StackPanel>
+            <Slider
+                Name="TimeSlider"
+                Value="{Binding Player.CurrentTime, Mode=TwoWay, Converter={StaticResource TimeSpanToSeconds}}"
+                Minimum="0"
+                Maximum="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource TimeSpanToSeconds}}"
+                IsMoveToPointEnabled="True"
+                Orientation="Horizontal"
+                Margin="10, 0, 10, 0"
+            />
         </StackPanel>
     </Grid>
 </Window>

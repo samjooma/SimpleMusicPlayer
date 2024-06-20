@@ -44,9 +44,34 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
-        private TimeSpan _currentTime;
-        public TimeSpan CurrentTime { get => _currentTime; }
-        public Duration Duration { get => Player.NaturalDuration; }
+        private TimeSpan _previousTime;
+
+        public TimeSpan CurrentTime
+        {
+            get => Player.Position;
+            set
+            {
+                if (value != Player.Position)
+                {
+                    Player.Position = value;
+                    NotifyPropertyChanged(nameof(CurrentTime));
+                }
+            }
+        }
+
+        private TimeSpan _duration;
+        public TimeSpan Duration
+        {
+            get => _duration;
+            private set
+            {
+                if (value != Duration)
+                {
+                    _duration = value;
+                    NotifyPropertyChanged(nameof(Duration));
+                }
+            }
+        }
 
         private System.Windows.Threading.DispatcherTimer Timer;
 
@@ -59,15 +84,22 @@ namespace MyMusicPlayer.ViewModel
             Timer.Tick += UpdateCurrentTime;
             Timer.Start();
             Player = new MediaPlayer();
+            Player.MediaOpened += Player_MediaOpened;
             _isPaused = true;
-            _currentTime = TimeSpan.Zero;
+            _previousTime = TimeSpan.Zero;
         }
 
         public void OpenFile(FileInfo File)
         {
             Player.Open(new Uri(File.FullName, UriKind.Absolute));
             OpenedAudioFile = File;
+        }
+
+        private void Player_MediaOpened(object? Sender, EventArgs e)
+        {
             IsPaused = true;
+            Duration = Player.NaturalDuration.TimeSpan;
+            _previousTime = TimeSpan.Zero;
         }
 
         public void CloseFile()
@@ -75,6 +107,8 @@ namespace MyMusicPlayer.ViewModel
             Player.Close();
             OpenedAudioFile = null;
             IsPaused = true;
+            Duration = TimeSpan.Zero;
+            _previousTime = TimeSpan.Zero;
         }
 
         public void Play()
@@ -117,11 +151,15 @@ namespace MyMusicPlayer.ViewModel
 
         private void UpdateCurrentTime(object? Sender, EventArgs e)
         {
-            int FlooredSeconds = (int)Math.Floor(Player.Position.TotalSeconds);
-            if (FlooredSeconds != (int)_currentTime.TotalSeconds)
+            if (!IsPaused)
             {
-                _currentTime = TimeSpan.FromSeconds(FlooredSeconds);
-                NotifyPropertyChanged(nameof(CurrentTime));
+                int TotalSeconds = (int)Math.Floor(Player.Position.TotalSeconds);
+                int PreviousTotalSeconds = (int)Math.Floor(_previousTime.TotalSeconds);
+                if (TotalSeconds != PreviousTotalSeconds)
+                {
+                    _previousTime = Player.Position;
+                    NotifyPropertyChanged(nameof(CurrentTime));
+                }
             }
         }
     }

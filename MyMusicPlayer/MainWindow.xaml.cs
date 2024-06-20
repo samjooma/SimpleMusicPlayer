@@ -254,4 +254,19 @@ namespace MyMusicPlayer
             return value.Equals(TrueValue);
         }
     }
+
+    public class TimeSpanToSeconds : IValueConverter
+    {
+        public object Convert(object Value, Type TargetType, object Parameter, CultureInfo Culture)
+        {
+            if (Value is TimeSpan Time) return Time.TotalSeconds;
+            return 0;
+        }
+
+        public object ConvertBack(object Value, Type TargetType, object Parameter, CultureInfo Culture)
+        {
+            if (Value is double Seconds) return TimeSpan.FromSeconds(Seconds);
+            return TimeSpan.Zero;
+        }
+    }
 }
