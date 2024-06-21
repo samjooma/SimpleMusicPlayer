@@ -74,6 +74,28 @@ namespace MyMusicPlayer
             }
         }
 
+        private void ListViewItem_PreviewMouseLeftButtonDown(object Sender, MouseButtonEventArgs e)
+        {
+            if (Sender is ListViewItem Item)
+            {
+                DragDrop.DoDragDrop(Item, Item, DragDropEffects.Move);
+            }
+        }
+
+        private void ListViewItem_Drop(object Sender, DragEventArgs e)
+        {
+            if (Sender is ListViewItem Item)
+            {
+                if (e.Data.GetDataPresent(typeof(ListViewItem)))
+                {
+                    var DragSource = (ListViewItem)e.Data.GetData(typeof(ListViewItem));
+                    int SourceIndex = SongQueueView.Items.IndexOf(DragSource.Content);
+                    int TargetIndex = SongQueueView.Items.IndexOf(Item.Content);
+                    SongQueue.MoveSong(SourceIndex, TargetIndex);
+                }
+            }
+        }
+
         //
         // Property changed events.
         //

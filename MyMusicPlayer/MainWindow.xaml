@@ -67,7 +67,7 @@
             <StackPanel Grid.Column="2">
                 <ListView
                     Name="SongQueueView"
-                    ItemsSource="{Binding SongQueue.FileList}"
+                    ItemsSource="{Binding SongQueue.FileList, Mode=OneWay}"
                     SelectionMode="Extended"
                 >
                     <ListView.View>
@@ -91,7 +91,10 @@
                     </ListView.Resources>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" >
-                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
+                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown"/>
+                            <EventSetter Event="Drop" Handler="ListViewItem_Drop"/>
+                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
+                            <Setter Property="AllowDrop" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsSongActive}" Value="True">
                                     <Setter Property="Background" Value="Red" />

@@ -19,23 +19,31 @@ namespace MyMusicPlayer.ViewModel
         public ReadOnlyObservableCollection<SongQueueItem> FileList { get; private set; }
 
         private SongQueueItem? _activeSong;
-        public SongQueueItem? ActiveSong { get { return _activeSong; } }
+        public SongQueueItem? ActiveSong
+        {
+            get => _activeSong;
+            private set
+            {
+                if (value != _activeSong)
+                {
+                    if (_activeSong != null) _activeSong.IsSongActive = false;
+                    _activeSong = value;
+                    if (_activeSong != null) _activeSong.IsSongActive = true;
+                    NotifyPropertyChanged(nameof(ActiveSong));
+                }
+            }
+        }
 
         private int? _activeSongIndex;
         public int? ActiveSongIndex {
-            get { return _activeSongIndex; }
+            get => _activeSongIndex;
             set
             {
                 if (value != _activeSongIndex)
                 {
                     _activeSongIndex = value;
-
-                    if (_activeSong != null) _activeSong.IsSongActive = false;
-                    _activeSong = _activeSongIndex != null ? _fileList[_activeSongIndex.Value] : null;
-                    if (_activeSong != null) _activeSong.IsSongActive = true;
-
+                    ActiveSong = _activeSongIndex != null ? FileList[_activeSongIndex.Value] : null;
                     NotifyPropertyChanged(nameof(ActiveSongIndex));
-                    NotifyPropertyChanged(nameof(ActiveSong));
                 }
             }
         }
@@ -43,6 +51,7 @@ namespace MyMusicPlayer.ViewModel
         public SongQueue()
         {
             _fileList = new ObservableCollection<SongQueueItem>();
+            _fileList.CollectionChanged += FileList_CollectionChanged;
             FileList = new ReadOnlyObservableCollection<SongQueueItem>(_fileList);
             _activeSongIndex = null;
             _activeSong = null;
@@ -56,30 +65,16 @@ namespace MyMusicPlayer.ViewModel
         public void InsertSong(int Index, SongQueueItem Item)
         {
             _fileList.Insert(Index, Item);
-            if (Index <= ActiveSongIndex)
-            {
-                ActiveSongIndex++;
-            }
         }
 
         public void RemoveSongAt(int Index)
         {
             _fileList.RemoveAt(Index);
-            if (Index == ActiveSongIndex)
-            {
-                ActiveSongIndex = null;
-            }
-            else if (Index < ActiveSongIndex)
-            {
-                ActiveSongIndex--;
-            }
         }
 
-        public void SetActiveIndexWrapped(int Index)
+        public void MoveSong(int FromIndex, int ToIndex)
         {
-            int Count = _fileList.Count;
-            int? WrappedIndex = (Index % Count + Count) % Count; // Keep index in range [0, Count[.
-            ActiveSongIndex = WrappedIndex;
+            _fileList.Move(FromIndex, ToIndex);
         }
 
         public void NextSong()
@@ -109,6 +104,19 @@ namespace MyMusicPlayer.ViewModel
         protected virtual void NotifyPropertyChanged(string PropertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+        }
+
+        private void SetActiveIndexWrapped(int Index)
+        {
+            int Count = FileList.Count;
+            int? WrappedIndex = (Index % Count + Count) % Count; // Keep index in range [0, Count[.
+            ActiveSongIndex = WrappedIndex;
+        }
+
+        private void FileList_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            int FoundIndex = FileList.ToList().FindIndex(x => ReferenceEquals(x, ActiveSong));
+            ActiveSongIndex = FoundIndex > -1 ? FoundIndex : null;
         }
     }
 }
