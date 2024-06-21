@@ -244,4 +244,27 @@ namespace MyMusicPlayer
             return TimeSpan.Zero;
         }
     }
+
+    public class MultiplyValue : IValueConverter
+    {
+        public object Convert(object Value, Type TargetType, object Parameter, CultureInfo Culture)
+        {
+            if (Value is not double a)
+            {
+                throw new FormatException("The type of the value being converted must be double");
+            }
+            var b = double.Parse((string)Parameter);
+            return a * b;
+        }
+
+        public object ConvertBack(object Value, Type TargetType, object Parameter, CultureInfo Culture)
+        {
+            if (Value is not double a)
+            {
+                throw new FormatException("The type of the value being converted must be double");
+            }
+            var b = double.Parse((string)Parameter);
+            return a / b;
+        }
+    }
 }

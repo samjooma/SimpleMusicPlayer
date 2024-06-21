@@ -12,6 +12,7 @@
         <local:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
         <local:BooleanConverter x:Key="BooleanToPauseResume" FalseValue="Pause" TrueValue="Resume"/>
         <local:TimeSpanToSeconds x:Key="TimeSpanToSeconds"/>
+        <local:MultiplyValue x:Key="MultiplyValue"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
@@ -23,7 +24,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
@@ -103,29 +104,45 @@
         </Grid>
         <StackPanel Grid.Row="1">
             <Separator/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Previous" Command="MediaCommands.PreviousTrack"/>
-                <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Command="MediaCommands.Pause" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
-                <Button Content="Next" Command="MediaCommands.NextTrack"/>
-                <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="{Binding Player.CurrentTime}"/>
-                    <Label Content="/"/>
-                    <Label Content="{Binding Player.Duration}"/>
+            <StackPanel Margin="10, 10, 10, 10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Previous" Command="MediaCommands.PreviousTrack"/>
+                    <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Command="MediaCommands.Pause" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
+                    <Button Content="Next" Command="MediaCommands.NextTrack"/>
+                    <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
                 </StackPanel>
+                <DockPanel>
+                    <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{Binding Player.CurrentTime}"/>
+                        <Label Content="/"/>
+                        <Label Content="{Binding Player.Duration}"/>
+                    </StackPanel>
+                    <Label
+                        DockPanel.Dock="Right"
+                        Content="{Binding Player.Volume, Converter={StaticResource MultiplyValue}, ConverterParameter=100}"
+                        ContentStringFormat="F1"
+                        Width="40"
+                    />
+                    <Slider
+                        DockPanel.Dock="Right"
+                        Value="{Binding Player.Volume}"
+                        Minimum="0"
+                        Maximum="1"
+                        IsMoveToPointEnabled="True"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Width="100"
+                    />
+                </DockPanel>
+                <Slider
+                    Value="{Binding Player.CurrentTime, Mode=TwoWay, Converter={StaticResource TimeSpanToSeconds}}"
+                    Minimum="0"
+                    Maximum="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource TimeSpanToSeconds}}"
+                    IsMoveToPointEnabled="True"
+                    Orientation="Horizontal"
+                />
             </StackPanel>
-            <Slider
-                Name="TimeSlider"
-                Value="{Binding Player.CurrentTime, Mode=TwoWay, Converter={StaticResource TimeSpanToSeconds}}"
-                Minimum="0"
-                Maximum="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource TimeSpanToSeconds}}"
-                IsMoveToPointEnabled="True"
-                Orientation="Horizontal"
-                Margin="10, 0, 10, 0"
-            />
         </StackPanel>
     </Grid>
 </Window>

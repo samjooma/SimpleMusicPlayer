@@ -73,6 +73,19 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
+        public double Volume
+        {
+            get => Player.Volume;
+            set
+            {
+                if (value != Volume)
+                {
+                    Player.Volume = value;
+                    NotifyPropertyChanged(nameof(Volume));
+                }
+            }
+        }
+
         private System.Windows.Threading.DispatcherTimer Timer;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -86,6 +99,7 @@ namespace MyMusicPlayer.ViewModel
             Player = new MediaPlayer();
             Player.MediaOpened += Player_MediaOpened;
             _isPaused = true;
+            _duration = TimeSpan.Zero;
             _previousTime = TimeSpan.Zero;
         }
 
