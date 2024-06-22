@@ -1,23 +1,14 @@
 ﻿using Microsoft.Win32;
 using System.ComponentModel;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Diagnostics;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
-using System.IO;
 using System.Windows.Controls.Primitives;
 using System.Collections.Specialized;
-using System.Data;
 
 namespace MyMusicPlayer
 {
@@ -30,6 +21,9 @@ namespace MyMusicPlayer
         public ViewModel.AudioPlayer Player { get; private set; }
         public ViewModel.SongQueue SongQueue { get; private set; }
         public ObservableCollection<ViewModel.FileItem> DirectoryFiles { get; private set; }
+
+        public static RoutedUICommand PlaySelectedSong = new(nameof(PlaySelectedSong), nameof(PlaySelectedSong), typeof(MainWindow));
+        public static RoutedUICommand AddSongToQueue = new(nameof(AddSongToQueue), nameof(AddSongToQueue), typeof(MainWindow));
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -63,18 +57,15 @@ namespace MyMusicPlayer
             }
         }
 
-        private void DirectoryView_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
+        private void DirectoryFileItem_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
         {
-            if (Sender is ListView View)
+            if (Sender is ListViewItem ViewItem && ViewItem.Content is ViewModel.FileItem FileItem)
             {
-                if (View.SelectedItem is ViewModel.FileItem Item)
-                {
-                    SongQueue.AddSong(new ViewModel.SongQueueItem(Item.FileInfo, false));
-                }
+                SongQueue.AddSong(new ViewModel.SongQueueItem(FileItem.FileInfo, false));
             }
         }
 
-        private void ListViewItem_PreviewMouseLeftButtonDown(object Sender, MouseButtonEventArgs e)
+        private void SongQueueItem_PreviewMouseLeftButtonDown(object Sender, MouseButtonEventArgs e)
         {
             if (Sender is ListViewItem Item)
             {
@@ -82,7 +73,7 @@ namespace MyMusicPlayer
             }
         }
 
-        private void ListViewItem_Drop(object Sender, DragEventArgs e)
+        private void SongQueueItem_Drop(object Sender, DragEventArgs e)
         {
             if (Sender is ListViewItem Item)
             {
@@ -158,21 +149,18 @@ namespace MyMusicPlayer
 
         private void CommandPlay_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            SongQueue.ActiveSongIndex = SongQueueView.SelectedIndex;
         }
 
         private void CommandPlay_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            int Index = SongQueueView.SelectedIndex;
-            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
         }
 
-        private void CommandPause_Executed(object Sender, ExecutedRoutedEventArgs e)
+        private void CommandTogglePlayPause_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
             Player.TogglePause();
         }
 
-        private void CommandPause_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        private void CommandTogglePlayPause_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = SongQueue.FileList.Count > 0;
         }
@@ -206,87 +194,16 @@ namespace MyMusicPlayer
         {
             e.CanExecute = SongQueue.FileList.Count > 0;
         }
-    }
 
-    public class ObjectArrayConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        private void CommandPlaySelectedSong_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            return new object[] { value };
+            SongQueue.ActiveSongIndex = SongQueueView.SelectedIndex;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        private void CommandPlaySelectedSong_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class FileNameWithoutExtension : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Path.GetFileNameWithoutExtension((value as string) ?? "");
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class BooleanConverter : IValueConverter
-    {
-        public string FalseValue { get; set; }
-        public string TrueValue { get; set; }
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null) return FalseValue!;
-            return (bool)value ? TrueValue! : FalseValue!;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null) return false;
-            return value.Equals(TrueValue);
-        }
-    }
-
-    public class TimeSpanToSeconds : IValueConverter
-    {
-        public object Convert(object Value, Type TargetType, object Parameter, CultureInfo Culture)
-        {
-            if (Value is TimeSpan Time) return Time.TotalSeconds;
-            return 0;
-        }
-
-        public object ConvertBack(object Value, Type TargetType, object Parameter, CultureInfo Culture)
-        {
-            if (Value is double Seconds) return TimeSpan.FromSeconds(Seconds);
-            return TimeSpan.Zero;
-        }
-    }
-
-    public class MultiplyValue : IValueConverter
-    {
-        public object Convert(object Value, Type TargetType, object Parameter, CultureInfo Culture)
-        {
-            if (Value is not double a)
-            {
-                throw new FormatException("The type of the value being converted must be double");
-            }
-            var b = double.Parse((string)Parameter);
-            return a * b;
-        }
-
-        public object ConvertBack(object Value, Type TargetType, object Parameter, CultureInfo Culture)
-        {
-            if (Value is not double a)
-            {
-                throw new FormatException("The type of the value being converted must be double");
-            }
-            var b = double.Parse((string)Parameter);
-            return a / b;
+            int Index = SongQueueView.SelectedIndex;
+            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
         }
     }
 }
