@@ -75,7 +75,7 @@ namespace UnitTestProject
         [TestMethod]
         public void CreateRoot_NameIsValid()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
             Assert.AreEqual(RootDirectoryName, Files.RootDirectory.Name, false);
         }
@@ -83,18 +83,18 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenRootSubDirectories_ContainsTwo()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
-            var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
+            var SubDirectories = Files.AddDirectory(Files.RootDirectory);
             Assert.AreEqual(2, SubDirectories.Length);
         }
 
         [TestMethod]
         public void OpenRootSubDirectories_NameIsValid()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
-            var SubDirectories = Files.OpenDirectory(Files.RootDirectory);
+            var SubDirectories = Files.AddDirectory(Files.RootDirectory);
             Assert.AreEqual("Kevin MacLeod", SubDirectories[0].Name, false);
         }
 
@@ -102,13 +102,13 @@ namespace UnitTestProject
         [DynamicData(nameof(AllDirectoriesNameTree))]
         public void OpenAllDirectories_NamesAreValid(FileNameTree ExpectedNameTree)
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
 
             void AssertAndOpen(DirectoryInfo Directory, FileNameTree SubTree)
             {
                 Assert.AreEqual(SubTree.Name, Directory.Name, false);
-                var Subdirectories = Files.OpenDirectory(Directory);
+                var Subdirectories = Files.AddDirectory(Directory);
                 for (int i = 0; i < Subdirectories.Length; i++)
                 {
                     AssertAndOpen(Subdirectories[i], SubTree.Children[i]);
@@ -120,18 +120,18 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenAllDirectories_CloseRootSubDirectories_DirectoryCountIsOne()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
 
             void Open(DirectoryInfo Directory)
             {
-                foreach (var Subdirectory in Files.OpenDirectory(Directory))
+                foreach (var Subdirectory in Files.AddDirectory(Directory))
                 {
                     Open(Subdirectory);
                 }
             }
             Open(Files.RootDirectory);
-            Files.CloseSubDirectories(Files.RootDirectory);
+            Files.RemoveSubDirectories(Files.RootDirectory);
 
             Assert.AreEqual(1, Files.GetAllOpenDirectories().Length);
         }
@@ -139,14 +139,14 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenAllDirectories_CloseInReverse_DirectoryCountIsOne()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
 
             var CloseQueue = new List<DirectoryInfo>();
             void Open(DirectoryInfo Directory)
             {
                 CloseQueue.Insert(0, Directory);
-                foreach (var Subdirectory in Files.OpenDirectory(Directory))
+                foreach (var Subdirectory in Files.AddDirectory(Directory))
                 {
                     Open(Subdirectory);
                 }
@@ -154,7 +154,7 @@ namespace UnitTestProject
             Open(Files.RootDirectory);
             foreach (var Directory in CloseQueue)
             {
-                Files.CloseSubDirectories(Directory);
+                Files.RemoveSubDirectories(Directory);
             }
 
             Assert.IsTrue(Files.GetAllOpenDirectories().Length == 1);
@@ -163,11 +163,11 @@ namespace UnitTestProject
         [TestMethod]
         public void OpenRootCloseRoot_ThrowArgumentException()
         {
-            var Files = new DirectoryHierarchy();
+            var Files = new DirectoryTreeData();
             Files.OpenDirectory(RootDirectoryName);
             try
             {
-                Files.CloseDirectory(Files.RootDirectory);
+                Files.RemoveDirectory(Files.RootDirectory);
                 Assert.Fail();
             }
             catch (ArgumentException)

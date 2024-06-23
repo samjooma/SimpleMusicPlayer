@@ -17,10 +17,10 @@ namespace MyMusicPlayer
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ViewModel.DirectoryTree? Directories { get; private set; }
+        public ViewModel.DirectoryTree DirectoryTree { get; private set; }
         public ViewModel.AudioPlayer Player { get; private set; }
         public ViewModel.SongQueue SongQueue { get; private set; }
-        public ObservableCollection<ViewModel.FileItem> DirectoryFiles { get; private set; }
+        public ObservableCollection<ViewModel.FileItem> FilesInSelectedDirectory { get; private set; }
 
         public static RoutedUICommand PlaySelectedSong = new(nameof(PlaySelectedSong), nameof(PlaySelectedSong), typeof(MainWindow));
         public static RoutedUICommand AddSongToQueue = new(nameof(AddSongToQueue), nameof(AddSongToQueue), typeof(MainWindow));
@@ -29,33 +29,18 @@ namespace MyMusicPlayer
 
         public MainWindow()
         {
+            DirectoryTree = new ViewModel.DirectoryTree();
+            DirectoryTree.PropertyChanged += Directories_PropertyChanged;
             Player = new ViewModel.AudioPlayer();
             SongQueue = new ViewModel.SongQueue();
             SongQueue.PropertyChanged += SongQueue_PropertyChanged;
-            DirectoryFiles = new ObservableCollection<ViewModel.FileItem>();
+            FilesInSelectedDirectory = new ObservableCollection<ViewModel.FileItem>();
             InitializeComponent();
-        }
-
-        private void SetRootDirectory(string RootDirectoryPath)
-        {
-            Directories = new ViewModel.DirectoryTree(RootDirectoryPath);
-            Directories.PropertyChanged += Directories_PropertyChanged;
-            NotifyPropertyChanged(nameof(Directories));
         }
 
         //
         // User interface events.
         //
-
-        private void OpenFolderButton_Click(object Sender, RoutedEventArgs e)
-        {
-            var OpenFileDialog = new CommonOpenFileDialog();
-            OpenFileDialog.IsFolderPicker = true;
-            if (OpenFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                SetRootDirectory(OpenFileDialog.FileName);
-            }
-        }
 
         private void DirectoryFileItem_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
         {
@@ -98,17 +83,16 @@ namespace MyMusicPlayer
 
         private void Directories_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
         {
-            if (Sender != Directories) throw new ArgumentException();
-            if (Directories == null) throw new ArgumentNullException();
-            if (e.PropertyName == nameof(Directories.SelectedItem))
+            if (Sender != DirectoryTree) throw new ArgumentException();
+            if (e.PropertyName == nameof(DirectoryTree.SelectedDirectory))
             {
-                if (Directories.SelectedItem != null)
+                if (DirectoryTree.SelectedDirectory != null)
                 {
-                    DirectoryFiles.Clear();
-                    foreach (var File in Directories.SelectedItem.AudioFiles)
+                    FilesInSelectedDirectory.Clear();
+                    foreach (var File in DirectoryTree.SelectedDirectory.AudioFiles)
                     {
                         var Item = new ViewModel.FileItem(File);
-                        DirectoryFiles.Add(Item);
+                        FilesInSelectedDirectory.Add(Item);
                     }
                 }
             }

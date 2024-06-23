@@ -147,7 +147,7 @@ namespace UnitTestProject
             }
             OpenAndSelect(FilesViewModel.RootDirectory);
 
-            Assert.AreSame(LastSelected, FilesViewModel.SelectedItem);
+            Assert.AreSame(LastSelected, FilesViewModel.SelectedDirectory);
         }
     }
 }

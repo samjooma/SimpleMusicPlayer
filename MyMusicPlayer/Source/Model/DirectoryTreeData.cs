@@ -10,56 +10,48 @@ using static System.Net.WebRequestMethods;
 
 namespace MyMusicPlayer.Model
 {
-    public class DirectoryHierarchy
+    public class DirectoryTreeData
     {
-        private DirectoryInfo? _rootDirectory;
-        public DirectoryInfo RootDirectory
-        {
-            get
-            {
-                if (_rootDirectory == null) { throw new ArgumentNullException(); }
-                return _rootDirectory;
-            }
-        }
-        private Dictionary<DirectoryInfo, DirectoryContent> DirectoryTree;
+        public DirectoryInfo? RootDirectory { get; private set; }
+        private Dictionary<DirectoryInfo, DirectoryContent> DirectoryDictionary;
 
-        public event EventHandler<DirectoryOpenedEventArgs>? AfterDirectoryOpened;
-        public event EventHandler<DirectoryClosedEventArgs>? AfterDirectoryClosed;
+        public event EventHandler<DirectoryAddedEventArgs>? AfterDirectoryAdded;
+        public event EventHandler<DirectoryRemovedEventArgs>? AfterDirectoryRemoved;
 
-        public DirectoryHierarchy()
+        public DirectoryTreeData()
         {
-            DirectoryTree = new Dictionary<DirectoryInfo, DirectoryContent>();
+            DirectoryDictionary = new Dictionary<DirectoryInfo, DirectoryContent>();
         }
 
-        public void OpenDirectory(DirectoryInfo Directory)
+        public void AddDirectory(DirectoryInfo Directory)
         {
-            if (_rootDirectory == null)
+            if (DirectoryDictionary.Count == 0)
             {
-                _rootDirectory = Directory;
+                RootDirectory = Directory;
             }
 
-            void GetFiles(DirectoryInfo d)
+            void AddFiles(DirectoryInfo d)
             {
                 var AllFiles = d.GetFiles("*", SearchOption.TopDirectoryOnly);
                 string[] AudioExtensions = [".mp3"];
                 string[] PlaylistExtensions = [".m3u"];
-                DirectoryTree[d] = new DirectoryContent(
+                DirectoryDictionary[d] = new DirectoryContent(
                     d.GetDirectories("*", SearchOption.TopDirectoryOnly),
                     Array.FindAll(AllFiles, x => AudioExtensions.Contains(x.Extension)),
                     Array.FindAll(AllFiles, x => PlaylistExtensions.Contains(x.Extension))
                 );
             }
 
-            GetFiles(Directory);
-            foreach (DirectoryInfo SubDirectory in DirectoryTree[Directory].SubDirectories)
+            AddFiles(Directory);
+            foreach (DirectoryInfo SubDirectory in DirectoryDictionary[Directory].SubDirectories)
             {
-                GetFiles(SubDirectory);
+                AddFiles(SubDirectory);
             }
 
-            AfterDirectoryOpened?.Invoke(this, new DirectoryOpenedEventArgs(Directory));
+            AfterDirectoryAdded?.Invoke(this, new DirectoryAddedEventArgs(Directory));
         }
 
-        public void CloseDirectory(DirectoryInfo Directory)
+        public void RemoveDirectory(DirectoryInfo Directory)
         {
             if (Directory == RootDirectory)
             {
@@ -67,50 +59,56 @@ namespace MyMusicPlayer.Model
             }
 
             // Close children recursively.
-            foreach (var Subdirectory in DirectoryTree[Directory].SubDirectories)
+            foreach (var Subdirectory in DirectoryDictionary[Directory].SubDirectories)
             {
-                if (DirectoryTree.ContainsKey(Subdirectory))
+                if (DirectoryDictionary.ContainsKey(Subdirectory))
                 {
-                    CloseDirectory(Subdirectory);
+                    RemoveDirectory(Subdirectory);
                 }
             }
-            DirectoryTree.Remove(Directory);
-            AfterDirectoryClosed?.Invoke(this, new DirectoryClosedEventArgs(Directory));
+            DirectoryDictionary.Remove(Directory);
+            AfterDirectoryRemoved?.Invoke(this, new DirectoryRemovedEventArgs(Directory));
         }
 
-        public void CloseSubDirectories(DirectoryInfo Directory)
+        public void RemoveSubDirectories(DirectoryInfo Directory)
         {
             foreach (var SubDirectory in GetSubDirectories(Directory))
             {
-                CloseDirectory(SubDirectory);
+                RemoveDirectory(SubDirectory);
             }
         }
 
-        public bool IsDirectoryOpen(DirectoryInfo Directory)
+        public void Clear()
         {
-            return DirectoryTree.ContainsKey(Directory);
+            DirectoryDictionary.Clear();
+            RootDirectory = null;
+        }
+
+        public bool ContainsKey(DirectoryInfo Directory)
+        {
+            return DirectoryDictionary.ContainsKey(Directory);
         }
         
         public DirectoryInfo[] GetSubDirectories(DirectoryInfo Directory)
         {
-            return DirectoryTree[Directory].SubDirectories;
+            return DirectoryDictionary[Directory].SubDirectories;
         }
 
         public FileInfo[] GetAudioFiles(DirectoryInfo Directory)
         {
-            return DirectoryTree[Directory].AudioFiles;
+            return DirectoryDictionary[Directory].AudioFiles;
         }
 
         public FileInfo[] GetPlaylistFiles(DirectoryInfo Directory)
         {
-            return DirectoryTree[Directory].Playlists;
+            return DirectoryDictionary[Directory].Playlists;
         }
 
         public DirectoryInfo? GetParent(DirectoryInfo Directory)
         {
             try
             {
-                return DirectoryTree.First(x => x.Value.SubDirectories.Contains(Directory)).Key;
+                return DirectoryDictionary.First(x => x.Value.SubDirectories.Contains(Directory)).Key;
             }
             catch (InvalidOperationException)
             {
@@ -120,7 +118,7 @@ namespace MyMusicPlayer.Model
 
         public DirectoryInfo[] GetAllOpenDirectories()
         {
-            return DirectoryTree.Keys.ToArray();
+            return DirectoryDictionary.Keys.ToArray();
         }
     }
 
@@ -146,12 +144,12 @@ namespace MyMusicPlayer.Model
         }
     }
 
-    public class DirectoryOpenedEventArgs(DirectoryInfo Directory) : EventArgs
+    public class DirectoryAddedEventArgs(DirectoryInfo Directory) : EventArgs
     {
         public DirectoryInfo OpenedDirectory = Directory;
     }
 
-    public class DirectoryClosedEventArgs(DirectoryInfo Directory) : EventArgs
+    public class DirectoryRemovedEventArgs(DirectoryInfo Directory) : EventArgs
     {
         public DirectoryInfo ClosedDirectory = Directory;
     }

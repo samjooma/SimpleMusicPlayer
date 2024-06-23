@@ -31,29 +31,13 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0">
-                <Button DockPanel.Dock="Top" Name="OpenFolderButton" Content="Open folder" VerticalAlignment="Top" Click="OpenFolderButton_Click"/>
                 <ScrollViewer DockPanel.Dock="Bottom">
-                    <TreeView
-                        Name="FileHierarchyTreeView"
-                        ItemsSource="{Binding Path=Directories.RootDirectory, Converter={convert:ObjectIntoArray}}">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                <Setter Property="FontWeight" Value="Normal" />
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                        <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                                <TextBlock Text="{Binding Name}" />
-                            </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
+                    <view:DirectoryTreeView DataContext="{Binding DirectoryTree}"/>
                 </ScrollViewer>
             </DockPanel>
             <StackPanel Grid.Column="1">
-                <Label Name="SelectedFileLabel" Content="{Binding Directories.SelectedItem}" VerticalAlignment="Top" Height="26"/>
-                <ListView ItemsSource="{Binding DirectoryFiles}">
+                <Label Name="SelectedFileLabel" Content="{Binding DirectoryTree.SelectedDirectory.Name}" VerticalAlignment="Top" Height="26"/>
+                <ListView ItemsSource="{Binding FilesInSelectedDirectory}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
