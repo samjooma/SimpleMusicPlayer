@@ -1,19 +1,16 @@
-﻿<Window x:Class="MyMusicPlayer.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MyMusicPlayer"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
-        DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    <Window.Resources>
-        <local:ObjectArrayConverter x:Key="ObjectArrayConverter"/>
-        <local:FileNameWithoutExtension x:Key="FileNameWithoutExtension"/>
-        <local:BooleanConverter x:Key="BooleanToPauseResume" FalseValue="Pause" TrueValue="Resume"/>
-        <local:TimeSpanToSeconds x:Key="TimeSpanToSeconds"/>
-        <local:MultiplyValue x:Key="MultiplyValue"/>
-    </Window.Resources>
+﻿<Window
+    x:Class="MyMusicPlayer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:MyMusicPlayer"
+    xmlns:convert="clr-namespace:MyMusicPlayer.ValueConverters"
+    xmlns:view="clr-namespace:MyMusicPlayer.View" 
+    mc:Ignorable="d"
+    Title="MainWindow" Height="450" Width="800"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+>
     <Window.CommandBindings>
         <CommandBinding Command="MediaCommands.Play" Executed="CommandPlay_Executed" CanExecute="CommandPlay_CanExecute"/>
         <CommandBinding Command="MediaCommands.TogglePlayPause" Executed="CommandTogglePlayPause_Executed" CanExecute="CommandTogglePlayPause_CanExecute"/>
@@ -38,7 +35,7 @@
                 <ScrollViewer DockPanel.Dock="Bottom">
                     <TreeView
                         Name="FileHierarchyTreeView"
-                        ItemsSource="{Binding Path=Directories.RootDirectory, Converter={StaticResource ObjectArrayConverter}}">
+                        ItemsSource="{Binding Path=Directories.RootDirectory, Converter={convert:ObjectIntoArray}}">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -111,47 +108,6 @@
                 </ListView>
             </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="1">
-            <Separator/>
-            <StackPanel Margin="10, 10, 10, 10">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Previous" Command="MediaCommands.PreviousTrack"/>
-                    <Button Content="{Binding Player.IsPaused, Converter={StaticResource BooleanToPauseResume}}" Command="MediaCommands.TogglePlayPause" Width="200" HorizontalAlignment="Center" Margin="10,0,10,0"/>
-                    <Button Content="Next" Command="MediaCommands.NextTrack"/>
-                    <Button Content="Stop" Command="MediaCommands.Stop" Margin="10,0,0,0"/>
-                </StackPanel>
-                <DockPanel>
-                    <Label Content="{Binding Player.OpenedAudioFile.Name, Converter={StaticResource FileNameWithoutExtension}}"/>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="{Binding Player.CurrentTime}"/>
-                        <Label Content="/"/>
-                        <Label Content="{Binding Player.Duration}"/>
-                    </StackPanel>
-                    <Label
-                        DockPanel.Dock="Right"
-                        Content="{Binding Player.Volume, Converter={StaticResource MultiplyValue}, ConverterParameter=100}"
-                        ContentStringFormat="F1"
-                        Width="40"
-                    />
-                    <Slider
-                        DockPanel.Dock="Right"
-                        Value="{Binding Player.Volume}"
-                        Minimum="0"
-                        Maximum="1"
-                        IsMoveToPointEnabled="True"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Width="100"
-                    />
-                </DockPanel>
-                <Slider
-                    Value="{Binding Player.CurrentTime, Mode=TwoWay, Converter={StaticResource TimeSpanToSeconds}}"
-                    Minimum="0"
-                    Maximum="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource TimeSpanToSeconds}}"
-                    IsMoveToPointEnabled="True"
-                    Orientation="Horizontal"
-                />
-            </StackPanel>
-        </StackPanel>
+        <view:PlayerControlsView Grid.Row="1"/>
     </Grid>
 </Window>
