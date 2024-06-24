@@ -22,7 +22,6 @@ namespace MyMusicPlayer
         public ViewModel.SongQueue SongQueue { get; private set; }
         public ObservableCollection<ViewModel.FileItem> FilesInSelectedDirectory { get; private set; }
 
-        public static RoutedUICommand PlaySelectedSong = new(nameof(PlaySelectedSong), nameof(PlaySelectedSong), typeof(MainWindow));
         public static RoutedUICommand AddSongToQueue = new(nameof(AddSongToQueue), nameof(AddSongToQueue), typeof(MainWindow));
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -41,28 +40,6 @@ namespace MyMusicPlayer
         //
         // User interface events.
         //
-
-        private void SongQueueItem_PreviewMouseLeftButtonDown(object Sender, MouseButtonEventArgs e)
-        {
-            if (Sender is ListViewItem Item)
-            {
-                DragDrop.DoDragDrop(Item, Item, DragDropEffects.Move);
-            }
-        }
-
-        private void SongQueueItem_Drop(object Sender, DragEventArgs e)
-        {
-            if (Sender is ListViewItem Item)
-            {
-                if (e.Data.GetDataPresent(typeof(ListViewItem)))
-                {
-                    var DragSource = (ListViewItem)e.Data.GetData(typeof(ListViewItem));
-                    int SourceIndex = SongQueueView.Items.IndexOf(DragSource.Content);
-                    int TargetIndex = SongQueueView.Items.IndexOf(Item.Content);
-                    SongQueue.MoveSong(SourceIndex, TargetIndex);
-                }
-            }
-        }
 
         private void FileListView_ItemMouseDoubleClick(object Sender, EventArgs e)
         {
@@ -117,20 +94,6 @@ namespace MyMusicPlayer
         // Commands.
         //
 
-        private void CommandDelete_Executed(object Sender, ExecutedRoutedEventArgs e)
-        {
-            if (SongQueueView.SelectedIndex > -1)
-            {
-                SongQueue.RemoveSongAt(SongQueueView.SelectedIndex);
-            }
-        }
-
-        private void CommandDelete_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
-        {
-            int Index = SongQueueView.SelectedIndex;
-            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
-        }
-
         private void CommandPlay_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
         }
@@ -177,17 +140,6 @@ namespace MyMusicPlayer
         private void CommandNextTrack_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = SongQueue.FileList.Count > 0;
-        }
-
-        private void CommandPlaySelectedSong_Executed(object Sender, ExecutedRoutedEventArgs e)
-        {
-            SongQueue.ActiveSongIndex = SongQueueView.SelectedIndex;
-        }
-
-        private void CommandPlaySelectedSong_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
-        {
-            int Index = SongQueueView.SelectedIndex;
-            e.CanExecute = Index > -1 && Index < SongQueueView.Items.Count;
         }
     }
 }

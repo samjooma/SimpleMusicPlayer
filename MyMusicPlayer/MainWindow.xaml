@@ -17,7 +17,6 @@
         <CommandBinding Command="MediaCommands.Stop" Executed="CommandStop_Executed" CanExecute="CommandStop_CanExecute"/>
         <CommandBinding Command="MediaCommands.PreviousTrack" Executed="CommandPreviousTrack_Executed" CanExecute="CommandPreviousTrack_CanExecute"/>
         <CommandBinding Command="MediaCommands.NextTrack" Executed="CommandNextTrack_Executed" CanExecute="CommandNextTrack_CanExecute"/>
-        <CommandBinding Command="{x:Static local:MainWindow.PlaySelectedSong}" Executed="CommandPlaySelectedSong_Executed" CanExecute="CommandPlaySelectedSong_CanExecute"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -40,46 +39,7 @@
                 DataContext="{Binding DirectoryTree.SelectedNode}"
                 ItemMouseDoubleClick="FileListView_ItemMouseDoubleClick"
             />
-            <StackPanel Grid.Column="2">
-                <ListView
-                    Name="SongQueueView"
-                    ItemsSource="{Binding SongQueue.FileList, Mode=OneWay}"
-                    SelectionMode="Extended"
-                >
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                            <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
-                        </GridView>
-                    </ListView.View>
-                    <ListView.CommandBindings>
-                        <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
-                    </ListView.CommandBindings>
-                    <ListView.InputBindings>
-                        <MouseBinding Gesture="LeftDoubleClick" Command="local:MainWindow.PlaySelectedSong"/>
-                        <KeyBinding Key="Enter" Command="local:MainWindow.PlaySelectedSong"/>
-                    </ListView.InputBindings>
-                    <ListView.Resources>
-                        <ContextMenu x:Key="ItemContextMenu">
-                            <MenuItem Command="local:MainWindow.PlaySelectedSong"/>
-                            <MenuItem Command="ApplicationCommands.Delete"/>
-                        </ContextMenu>
-                    </ListView.Resources>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}" >
-                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SongQueueItem_PreviewMouseLeftButtonDown"/>
-                            <EventSetter Event="Drop" Handler="SongQueueItem_Drop"/>
-                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}"/>
-                            <Setter Property="AllowDrop" Value="True"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSongActive}" Value="True">
-                                    <Setter Property="Background" Value="Red" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
-            </StackPanel>
+            <view:SongQueueView Grid.Column="2" DataContext="{Binding SongQueue}"/>
         </Grid>
         <view:PlayerControlsView Grid.Row="1"/>
     </Grid>
