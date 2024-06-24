@@ -42,14 +42,6 @@ namespace MyMusicPlayer
         // User interface events.
         //
 
-        private void DirectoryFileItem_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
-        {
-            if (Sender is ListViewItem ViewItem && ViewItem.Content is ViewModel.FileItem FileItem)
-            {
-                SongQueue.AddSong(new ViewModel.SongQueueItem(FileItem.FileInfo, false));
-            }
-        }
-
         private void SongQueueItem_PreviewMouseLeftButtonDown(object Sender, MouseButtonEventArgs e)
         {
             if (Sender is ListViewItem Item)
@@ -72,6 +64,14 @@ namespace MyMusicPlayer
             }
         }
 
+        private void FileListView_ItemMouseDoubleClick(object Sender, EventArgs e)
+        {
+            if (Sender is ListViewItem ViewItem && ViewItem.Content is System.IO.FileInfo File)
+            {
+                SongQueue.AddSong(new ViewModel.SongQueueItem(File, false));
+            }
+        }
+
         //
         // Property changed events.
         //
@@ -84,12 +84,12 @@ namespace MyMusicPlayer
         private void Directories_PropertyChanged(object? Sender, PropertyChangedEventArgs e)
         {
             if (Sender != DirectoryTree) throw new ArgumentException();
-            if (e.PropertyName == nameof(DirectoryTree.SelectedDirectory))
+            if (e.PropertyName == nameof(DirectoryTree.SelectedNode))
             {
-                if (DirectoryTree.SelectedDirectory != null)
+                if (DirectoryTree.SelectedNode != null)
                 {
                     FilesInSelectedDirectory.Clear();
-                    foreach (var File in DirectoryTree.SelectedDirectory.AudioFiles)
+                    foreach (var File in DirectoryTree.SelectedNode.Files)
                     {
                         var Item = new ViewModel.FileItem(File);
                         FilesInSelectedDirectory.Add(Item);

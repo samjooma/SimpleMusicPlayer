@@ -35,22 +35,11 @@
                     <view:DirectoryTreeView DataContext="{Binding DirectoryTree}"/>
                 </ScrollViewer>
             </DockPanel>
-            <StackPanel Grid.Column="1">
-                <Label Name="SelectedFileLabel" Content="{Binding DirectoryTree.SelectedDirectory.Name}" VerticalAlignment="Top" Height="26"/>
-                <ListView ItemsSource="{Binding FilesInSelectedDirectory}">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                            <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
-                        </GridView>
-                    </ListView.View>
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListViewItem}" >
-                            <EventSetter Event="MouseDoubleClick" Handler="DirectoryFileItem_MouseDoubleClick" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
-            </StackPanel>
+            <view:FileListView
+                Grid.Column="1"
+                DataContext="{Binding DirectoryTree.SelectedNode}"
+                ItemMouseDoubleClick="FileListView_ItemMouseDoubleClick"
+            />
             <StackPanel Grid.Column="2">
                 <ListView
                     Name="SongQueueView"

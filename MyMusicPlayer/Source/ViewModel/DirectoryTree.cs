@@ -20,16 +20,16 @@ namespace MyMusicPlayer.ViewModel
 
         private Model.DirectoryTreeData DirectoryData { get; set; }
         private Dictionary<DirectoryInfo, DirectoryNode> DirectoryNodesDictionary { get; set; }
-        private Node? _selectedDirectory;
-        public Node? SelectedDirectory
+        private FileContainerNode? _selectedNode;
+        public FileContainerNode? SelectedNode
         {
-            get => _selectedDirectory;
+            get => _selectedNode;
             private set
             {
-                if (value != _selectedDirectory)
+                if (value != _selectedNode)
                 {
-                    _selectedDirectory = value;
-                    NotifyPropertyChanged(nameof(SelectedDirectory));
+                    _selectedNode = value;
+                    NotifyPropertyChanged(nameof(SelectedNode));
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace MyMusicPlayer.ViewModel
         {
             DirectoryData.Clear();
             DirectoryNodesDictionary.Clear();
-            _selectedDirectory = null;
+            _selectedNode = null;
         }
 
         private DirectoryNode CreateDirectoryNodeRecursive(DirectoryInfo Directory)
@@ -79,14 +79,14 @@ namespace MyMusicPlayer.ViewModel
             if (DirectoryData.ContainsKey(Directory))
             {
                 // Add files.
-                Node.AudioFiles = new ObservableCollection<FileInfo>(DirectoryData.GetAudioFiles(Directory));
+                Node.Files = new ObservableCollection<FileInfo>(DirectoryData.GetAudioFiles(Directory));
 
                 // Add playlists.
                 foreach (FileInfo PlaylistFile in DirectoryData.GetPlaylistFiles(Directory))
                 {
                     var Child = new PlaylistNode(PlaylistFile.Name);
                     Child.IsSelectedChanged += TreeNode_IsSelectedChanged;
-                    Child.AudioFiles = new ObservableCollection<FileInfo>(Model.PlaylistParser.ReadPLaylist_M3U(PlaylistFile));
+                    Child.Files = new ObservableCollection<FileInfo>(Model.PlaylistParser.ReadPLaylist_M3U(PlaylistFile));
                     Node.Children.Add(Child);
                 }
 
@@ -115,20 +115,20 @@ namespace MyMusicPlayer.ViewModel
 
         private void TreeNode_IsSelectedChanged(object? Sender, EventArgs e)
         {
-            if (Sender is not Node ChangedNode) throw new ArgumentException();
+            if (Sender is not FileContainerNode ChangedNode) throw new ArgumentException();
             if (ChangedNode.IsSelected)
             {
                 // Deselect currently selected directory.
-                if (SelectedDirectory != null)
+                if (SelectedNode != null)
                 {
-                    SelectedDirectory.IsSelected = false;
+                    SelectedNode.IsSelected = false;
                 }
                 // Set reference to new selected object.
-                SelectedDirectory = ChangedNode;
+                SelectedNode = ChangedNode;
             }
             else
             {
-                SelectedDirectory = null;
+                SelectedNode = null;
             }
         }
 
@@ -165,7 +165,7 @@ namespace MyMusicPlayer.ViewModel
         }
     }
 
-    public class Node
+    public class FileContainerNode
     {
         private bool _isSelected;
         public bool IsSelected
@@ -182,26 +182,26 @@ namespace MyMusicPlayer.ViewModel
         }
 
         public string Name { get; private set; }
-        public ObservableCollection<FileInfo> AudioFiles { get; set; }
+        public ObservableCollection<FileInfo> Files { get; set; }
 
         public event EventHandler<EventArgs>? IsSelectedChanged;
 
-        public Node(string Name)
+        public FileContainerNode(string Name)
         {
             _isSelected = false;
             this.Name = Name;
-            AudioFiles = new ObservableCollection<FileInfo>();
+            Files = new ObservableCollection<FileInfo>();
         }
     }
 
-    public class PlaylistNode : Node
+    public class PlaylistNode : FileContainerNode
     {
         public PlaylistNode(string Name) : base(Name)
         {
         }
     }
 
-    public class DirectoryNode : Node
+    public class DirectoryNode : FileContainerNode
     {
         internal DirectoryInfo Info { get; set; }
 
@@ -219,7 +219,7 @@ namespace MyMusicPlayer.ViewModel
             }
         }
 
-        public ObservableCollection<Node> Children { get; set; }
+        public ObservableCollection<FileContainerNode> Children { get; set; }
 
         public event EventHandler<EventArgs>? IsExpandedChanged;
 
@@ -227,7 +227,7 @@ namespace MyMusicPlayer.ViewModel
         {
             this.Info = Info;
             _isExpanded = false;
-            Children = new ObservableCollection<Node>();
+            Children = new ObservableCollection<FileContainerNode>();
         }
     }
 }
