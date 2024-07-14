@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MyMusicPlayer.View
+namespace SimpleMusicPlayer.View
 {
     /// <summary>
     /// Interaction logic for FileListView.xaml

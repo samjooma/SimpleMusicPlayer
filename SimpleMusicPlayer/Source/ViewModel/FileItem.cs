@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyMusicPlayer.ViewModel
+namespace SimpleMusicPlayer.ViewModel
 {
     public class FileItem : INotifyPropertyChanged
     {

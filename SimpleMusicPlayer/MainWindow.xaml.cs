@@ -10,7 +10,7 @@ using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.
 using System.Windows.Controls.Primitives;
 using System.Collections.Specialized;
 
-namespace MyMusicPlayer
+namespace SimpleMusicPlayer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

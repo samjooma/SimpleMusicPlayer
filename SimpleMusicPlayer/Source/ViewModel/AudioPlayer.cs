@@ -10,7 +10,7 @@ using System.Windows;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace MyMusicPlayer.ViewModel
+namespace SimpleMusicPlayer.ViewModel
 {
     public class AudioPlayer : INotifyPropertyChanged
     {

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace MyMusicPlayer
+namespace SimpleMusicPlayer
 {
     /// <summary>
     /// Interaction logic for App.xaml

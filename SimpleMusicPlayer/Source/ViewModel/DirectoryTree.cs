@@ -12,7 +12,7 @@ using MS.WindowsAPICodePack.Internal;
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace MyMusicPlayer.ViewModel
+namespace SimpleMusicPlayer.ViewModel
 {
     public class DirectoryTree : INotifyPropertyChanged
     {

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MyMusicPlayer\SimpleMusicPlayer.csproj" />
+    <ProjectReference Include="..\SimpleMusicPlayer\SimpleMusicPlayer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

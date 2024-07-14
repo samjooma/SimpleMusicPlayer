@@ -1,4 +1,4 @@
-﻿using MyMusicPlayer.Model;
+﻿using SimpleMusicPlayer.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 
-namespace MyMusicPlayer.ViewModel
+namespace SimpleMusicPlayer.ViewModel
 {
     public class SongQueue : INotifyPropertyChanged
     {

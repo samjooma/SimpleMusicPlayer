@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MyMusicPlayer.View
+namespace SimpleMusicPlayer.View
 {
     public partial class SongQueueView : UserControl
     {

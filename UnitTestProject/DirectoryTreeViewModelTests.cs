@@ -1,10 +1,10 @@
-﻿using MyMusicPlayer;
+﻿using SimpleMusicPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyMusicPlayer.ViewModel;
+using SimpleMusicPlayer.ViewModel;
 
 namespace UnitTestProject
 {

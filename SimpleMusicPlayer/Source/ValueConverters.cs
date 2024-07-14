@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace MyMusicPlayer.ValueConverters
+namespace SimpleMusicPlayer.ValueConverters
 {
     public class StaticMarkup<T> : MarkupExtension where T : new()
     {
