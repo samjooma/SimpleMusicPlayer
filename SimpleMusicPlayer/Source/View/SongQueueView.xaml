@@ -9,7 +9,7 @@
     <StackPanel Grid.Column="2">
         <ListView
             Name="SongListView"
-            ItemsSource="{Binding FileList, Mode=OneWay}"
+            ItemsSource="{Binding SongQueueItems, Mode=OneWay}"
             SelectionMode="Extended"
         >
             <ListView.CommandBindings>

@@ -31,7 +31,10 @@
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Row="0">
                 <ScrollViewer DockPanel.Dock="Bottom">
-                    <view:DirectoryTreeView DataContext="{Binding DirectoryTree}"/>
+                    <view:DirectoryTreeView
+                        DataContext="{Binding DirectoryTree}"
+                        PlayAllFiles="DirectoryTreeView_PlayAllFiles"
+                    />
                 </ScrollViewer>
             </DockPanel>
             <view:FileListView

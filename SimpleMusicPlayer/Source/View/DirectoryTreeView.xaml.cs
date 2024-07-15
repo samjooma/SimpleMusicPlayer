@@ -54,12 +54,12 @@ namespace SimpleMusicPlayer.View
 
         private void PlayAllFiles_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            PlayAllFiles?.Invoke(Sender, EventArgs.Empty);
+            PlayAllFiles?.Invoke(e.OriginalSource, EventArgs.Empty);
         }
 
         private void PlayAllFiles_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = e.OriginalSource is TreeViewItem Item && Item.DataContext is ViewModel.FileContainerNode Container;
         }
     }
 }

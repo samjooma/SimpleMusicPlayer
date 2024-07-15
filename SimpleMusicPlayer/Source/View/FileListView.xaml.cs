@@ -23,18 +23,9 @@ namespace SimpleMusicPlayer.View
     /// </summary>
     public partial class FileListView : UserControl
     {
-        public class AddSongToQueueEventArgs : EventArgs
-        {
-            public FileInfo File { get; private set; }
-            public AddSongToQueueEventArgs(FileInfo File)
-            {
-                this.File = File;
-            }
-        }
-
         public static RoutedUICommand Command_AddSongToQueue = new(nameof(Command_AddSongToQueue), nameof(Command_AddSongToQueue), typeof(FileListView));
 
-        public event EventHandler<AddSongToQueueEventArgs> AddSongToQueue;
+        public event EventHandler AddSongToQueue;
 
         private IEnumerable<FileInfo> Files
         {
@@ -51,15 +42,12 @@ namespace SimpleMusicPlayer.View
 
         private void Command_AddSongToQueue_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            if (e.OriginalSource is FrameworkElement Element && Element.DataContext is FileInfo File)
-            {
-                AddSongToQueue?.Invoke(Sender, new AddSongToQueueEventArgs(File));
-            }
+            AddSongToQueue?.Invoke(e.OriginalSource, EventArgs.Empty);
         }
 
         private void Command_AddSongToQueue_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = e.OriginalSource is FrameworkElement Element && Element.DataContext is FileInfo;
         }
     }
 }

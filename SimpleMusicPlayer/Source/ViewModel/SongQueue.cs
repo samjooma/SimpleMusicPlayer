@@ -15,8 +15,8 @@ namespace SimpleMusicPlayer.ViewModel
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private ObservableCollection<SongQueueItem> _fileList;
-        public ReadOnlyObservableCollection<SongQueueItem> FileList { get; private set; }
+        private ObservableCollection<SongQueueItem> _songQueueItems;
+        public ReadOnlyObservableCollection<SongQueueItem> SongQueueItems { get; private set; }
 
         private SongQueueItem? _activeSong;
         public SongQueueItem? ActiveSong
@@ -42,7 +42,7 @@ namespace SimpleMusicPlayer.ViewModel
                 if (value != _activeSongIndex)
                 {
                     _activeSongIndex = value;
-                    ActiveSong = _activeSongIndex != null ? FileList[_activeSongIndex.Value] : null;
+                    ActiveSong = _activeSongIndex != null ? SongQueueItems[_activeSongIndex.Value] : null;
                     NotifyPropertyChanged(nameof(ActiveSongIndex));
                 }
             }
@@ -50,31 +50,36 @@ namespace SimpleMusicPlayer.ViewModel
 
         public SongQueue()
         {
-            _fileList = new ObservableCollection<SongQueueItem>();
-            _fileList.CollectionChanged += FileList_CollectionChanged;
-            FileList = new ReadOnlyObservableCollection<SongQueueItem>(_fileList);
+            _songQueueItems = new ObservableCollection<SongQueueItem>();
+            _songQueueItems.CollectionChanged += FileList_CollectionChanged;
+            SongQueueItems = new ReadOnlyObservableCollection<SongQueueItem>(_songQueueItems);
             _activeSongIndex = null;
             _activeSong = null;
         }
 
-        public void AddSong(SongQueueItem Item)
+        public void AddSong(FileInfo File)
         {
-            _fileList.Add(Item);
+            _songQueueItems.Add(new SongQueueItem(File, false));
         }
 
-        public void InsertSong(int Index, SongQueueItem Item)
+        public void InsertSong(int Index, FileInfo File)
         {
-            _fileList.Insert(Index, Item);
+            _songQueueItems.Insert(Index, new SongQueueItem(File, false));
         }
 
         public void RemoveSongAt(int Index)
         {
-            _fileList.RemoveAt(Index);
+            _songQueueItems.RemoveAt(Index);
+        }
+
+        public void Clear()
+        {
+            _songQueueItems.Clear();
         }
 
         public void MoveSong(int FromIndex, int ToIndex)
         {
-            _fileList.Move(FromIndex, ToIndex);
+            _songQueueItems.Move(FromIndex, ToIndex);
         }
 
         public void NextSong()
@@ -108,14 +113,14 @@ namespace SimpleMusicPlayer.ViewModel
 
         private void SetActiveIndexWrapped(int Index)
         {
-            int Count = FileList.Count;
+            int Count = SongQueueItems.Count;
             int? WrappedIndex = (Index % Count + Count) % Count; // Keep index in range [0, Count[.
             ActiveSongIndex = WrappedIndex;
         }
 
         private void FileList_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            int FoundIndex = FileList.ToList().FindIndex(x => ReferenceEquals(x, ActiveSong));
+            int FoundIndex = SongQueueItems.ToList().FindIndex(x => ReferenceEquals(x, ActiveSong));
             ActiveSongIndex = FoundIndex > -1 ? FoundIndex : null;
         }
     }

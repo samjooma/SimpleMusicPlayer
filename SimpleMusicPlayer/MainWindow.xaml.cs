@@ -40,9 +40,29 @@ namespace SimpleMusicPlayer
         // User interface events.
         //
 
-        private void FileListView_AddSongToQueue(object Sender, FileListView.AddSongToQueueEventArgs e)
+        private void FileListView_AddSongToQueue(object Sender, EventArgs e)
         {
-            SongQueue.AddSong(new ViewModel.SongQueueItem(e.File, false));
+            if (Sender is FrameworkElement Element && Element.DataContext is System.IO.FileInfo File)
+            {
+                SongQueue.AddSong(File);
+            }
+        }
+
+        private void DirectoryTreeView_PlayAllFiles(object Sender, EventArgs e)
+        {
+            if (Sender is TreeViewItem Item && Item.DataContext is ViewModel.FileContainerNode Container)
+            {
+                SongQueue.Clear();
+                foreach (var File in Container.Files)
+                {
+                    SongQueue.AddSong(File);
+                }
+                if (SongQueue.SongQueueItems.Count > 0)
+                {
+                    SongQueue.ActiveSongIndex = 0;
+                    Player.Play();
+                }
+            }
         }
 
         //
@@ -105,7 +125,7 @@ namespace SimpleMusicPlayer
 
         private void CommandTogglePlayPause_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = SongQueue.FileList.Count > 0;
+            e.CanExecute = SongQueue.SongQueueItems.Count > 0;
         }
 
         private void CommandStop_Executed(object Sender, ExecutedRoutedEventArgs e)
@@ -115,7 +135,7 @@ namespace SimpleMusicPlayer
 
         private void CommandStop_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = SongQueue.FileList.Count > 0;
+            e.CanExecute = SongQueue.SongQueueItems.Count > 0;
         }
 
         private void CommandPreviousTrack_Executed(object Sender, ExecutedRoutedEventArgs e)
@@ -125,7 +145,7 @@ namespace SimpleMusicPlayer
 
         private void CommandPreviousTrack_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = SongQueue.FileList.Count > 0;
+            e.CanExecute = SongQueue.SongQueueItems.Count > 0;
         }
 
         private void CommandNextTrack_Executed(object Sender, ExecutedRoutedEventArgs e)
@@ -135,7 +155,7 @@ namespace SimpleMusicPlayer
 
         private void CommandNextTrack_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = SongQueue.FileList.Count > 0;
+            e.CanExecute = SongQueue.SongQueueItems.Count > 0;
         }
     }
 }
