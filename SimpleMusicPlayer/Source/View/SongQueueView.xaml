@@ -12,12 +12,6 @@
             ItemsSource="{Binding FileList, Mode=OneWay}"
             SelectionMode="Extended"
         >
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
-                </GridView>
-            </ListView.View>
             <ListView.CommandBindings>
                 <CommandBinding Command="ApplicationCommands.Delete" Executed="CommandDelete_Executed" CanExecute="CommandDelete_CanExecute"/>
                 <CommandBinding Command="{x:Static view:SongQueueView.PlaySelectedSong}" Executed="CommandPlaySelectedSong_Executed" CanExecute="CommandPlaySelectedSong_CanExecute"/>
@@ -32,6 +26,12 @@
                     <MenuItem Command="ApplicationCommands.Delete"/>
                 </ContextMenu>
             </ListView.Resources>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Extension" DisplayMemberBinding="{Binding Extension}"/>
+                </GridView>
+            </ListView.View>
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}" >
                     <EventSetter Event="PreviewMouseLeftButtonDown" Handler="SongQueueItem_PreviewMouseLeftButtonDown"/>

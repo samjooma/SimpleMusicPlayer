@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,18 @@ namespace SimpleMusicPlayer.View
     /// </summary>
     public partial class FileListView : UserControl
     {
-        public event EventHandler ItemMouseDoubleClick;
+        public class AddSongToQueueEventArgs : EventArgs
+        {
+            public FileInfo File { get; private set; }
+            public AddSongToQueueEventArgs(FileInfo File)
+            {
+                this.File = File;
+            }
+        }
+
+        public static RoutedUICommand Command_AddSongToQueue = new(nameof(Command_AddSongToQueue), nameof(Command_AddSongToQueue), typeof(FileListView));
+
+        public event EventHandler<AddSongToQueueEventArgs> AddSongToQueue;
 
         private IEnumerable<FileInfo> Files
         {
@@ -37,9 +49,17 @@ namespace SimpleMusicPlayer.View
             InitializeComponent();
         }
 
-        private void ListViewItem_MouseDoubleClick(object Sender, MouseButtonEventArgs e)
+        private void Command_AddSongToQueue_Executed(object Sender, ExecutedRoutedEventArgs e)
         {
-            ItemMouseDoubleClick?.Invoke(Sender, e);
+            if (e.OriginalSource is FrameworkElement Element && Element.DataContext is FileInfo File)
+            {
+                AddSongToQueue?.Invoke(Sender, new AddSongToQueueEventArgs(File));
+            }
+        }
+
+        private void Command_AddSongToQueue_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
     }
 }

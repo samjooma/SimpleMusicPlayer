@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 using System.Windows.Controls.Primitives;
 using System.Collections.Specialized;
+using SimpleMusicPlayer.View;
 
 namespace SimpleMusicPlayer
 {
@@ -21,8 +22,6 @@ namespace SimpleMusicPlayer
         public ViewModel.AudioPlayer Player { get; private set; }
         public ViewModel.SongQueue SongQueue { get; private set; }
         public ObservableCollection<ViewModel.FileItem> FilesInSelectedDirectory { get; private set; }
-
-        public static RoutedUICommand AddSongToQueue = new(nameof(AddSongToQueue), nameof(AddSongToQueue), typeof(MainWindow));
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -41,12 +40,9 @@ namespace SimpleMusicPlayer
         // User interface events.
         //
 
-        private void FileListView_ItemMouseDoubleClick(object Sender, EventArgs e)
+        private void FileListView_AddSongToQueue(object Sender, FileListView.AddSongToQueueEventArgs e)
         {
-            if (Sender is ListViewItem ViewItem && ViewItem.Content is System.IO.FileInfo File)
-            {
-                SongQueue.AddSong(new ViewModel.SongQueueItem(File, false));
-            }
+            SongQueue.AddSong(new ViewModel.SongQueueItem(e.File, false));
         }
 
         //

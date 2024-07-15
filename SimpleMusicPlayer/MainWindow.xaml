@@ -37,7 +37,7 @@
             <view:FileListView
                 Grid.Column="1"
                 DataContext="{Binding DirectoryTree.SelectedNode}"
-                ItemMouseDoubleClick="FileListView_ItemMouseDoubleClick"
+                AddSongToQueue="FileListView_AddSongToQueue"
             />
             <view:SongQueueView Grid.Column="2" DataContext="{Binding SongQueue}"/>
         </Grid>

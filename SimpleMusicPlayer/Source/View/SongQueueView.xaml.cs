@@ -17,7 +17,7 @@ namespace SimpleMusicPlayer.View
 {
     public partial class SongQueueView : UserControl
     {
-        public static RoutedUICommand PlaySelectedSong = new(nameof(PlaySelectedSong), nameof(PlaySelectedSong), typeof(MainWindow));
+        public static RoutedUICommand PlaySelectedSong = new(nameof(PlaySelectedSong), nameof(PlaySelectedSong), typeof(SongQueueView));
 
         public SongQueueView()
         {

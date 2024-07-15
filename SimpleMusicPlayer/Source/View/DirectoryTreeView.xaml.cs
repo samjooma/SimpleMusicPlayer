@@ -18,11 +18,12 @@ using System.Windows.Shapes;
 
 namespace SimpleMusicPlayer.View
 {
-    /// <summary>
-    /// Interaction logic for DirectoryTreeView.xaml
-    /// </summary>
     public partial class DirectoryTreeView : UserControl
     {
+        public static RoutedUICommand Command_PlayAllFiles = new(nameof(Command_PlayAllFiles), nameof(Command_PlayAllFiles), typeof(DirectoryTreeView));
+
+        public event EventHandler PlayAllFiles;
+
         public IEnumerable ItemsSource
         {
             get => (IEnumerable)GetValue(ItemsSourceProperty);
@@ -49,6 +50,16 @@ namespace SimpleMusicPlayer.View
                     DirectoryTree.AddDirectory(new System.IO.DirectoryInfo(OpenFileDialog.FileName));
                 }
             }
+        }
+
+        private void PlayAllFiles_Executed(object Sender, ExecutedRoutedEventArgs e)
+        {
+            PlayAllFiles?.Invoke(Sender, EventArgs.Empty);
+        }
+
+        private void PlayAllFiles_CanExecute(object Sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
     }
 }
